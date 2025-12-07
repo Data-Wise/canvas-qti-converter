@@ -4,8 +4,8 @@ We love your input! We want to make contributing to this project as easy and tra
 
 ## Ways to Contribute
 
-- 🐛 **Report bugs** — Found an issue? [Open a bug report](https://github.com/Data-Wise/canvas-examifyer/issues/new)
-- 💡 **Suggest features** — Have an idea? [Start a discussion](https://github.com/Data-Wise/canvas-examifyer/issues/new)
+- 🐛 **Report bugs** — Found an issue? [Open a bug report](https://github.com/Data-Wise/examify/issues/new)
+- 💡 **Suggest features** — Have an idea? [Start a discussion](https://github.com/Data-Wise/examify/issues/new)
 - 🔧 **Submit fixes** — PRs are welcome for any bug fixes
 - 📚 **Improve docs** — Help us make the documentation better
 
@@ -20,8 +20,8 @@ We love your input! We want to make contributing to this project as easy and tra
 
 ```bash
 # Clone the repository
-git clone https://github.com/Data-Wise/canvas-examifyer.git
-cd canvas-examifyer
+git clone https://github.com/Data-Wise/examify.git
+cd examify
 
 # Install dependencies
 npm install
@@ -74,13 +74,13 @@ examify emulate-canvas test.qti.zip
 ## Project Structure
 
 ```text
-canvas-examifyer/
+examify/
 ├── src/
-│   ├── cli.ts          # Command-line interface
-│   ├── parser.ts       # Markdown parsing logic
-│   ├── generator.ts    # QTI XML generation
-│   ├── validator.ts    # Package validation
-│   └── emulator.ts     # Canvas import simulation
+│   ├── index.ts        # CLI entry point
+│   ├── parser/         # Markdown parsing logic
+│   ├── generator/      # QTI XML generation
+│   ├── diagnostic/     # Validation & Emulation
+│   └── utils/          # Shared utilities
 ├── tests/              # Test suite
 ├── docs/               # MkDocs documentation
 └── examples/           # Sample input files
@@ -114,4 +114,4 @@ Be kind. We're all here to learn and build something useful together.
 
 ## Questions?
 
-Feel free to [open an issue](https://github.com/Data-Wise/canvas-examifyer/issues) for any questions!
+Feel free to [open an issue](https://github.com/Data-Wise/examify/issues) for any questions!

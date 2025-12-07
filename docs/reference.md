@@ -1,6 +1,6 @@
 # CLI Reference
 
-Complete command reference for Canvas QTI Converter.
+Complete command reference for **Examify**.
 
 ## Commands
 

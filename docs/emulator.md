@@ -1,6 +1,6 @@
 # Canvas Import Emulator
 
-The emulator predicts whether your QTI package will import successfully into Canvas LMS.
+The **Examify** emulator predicts whether your QTI package will import successfully into Canvas LMS.
 
 ## Usage
 
@@ -70,7 +70,7 @@ This error means Canvas can't find the `correctResponse` element:
     Always run the emulator before uploading to Canvas to catch issues early.
 
 !!! tip "R/Python Figures"
-    Generate all figures with Quarto/RMarkdown *before* running the converter.
+    Generate all figures with Quarto/RMarkdown *before* running Examify.
 
 ---
 
@@ -120,7 +120,7 @@ Check that:
 | `$x^2$` | `\(x^2\)` |
 | `$$\sum_{i=1}^n$$` | `\[\sum_{i=1}^n\]` |
 
-The converter handles this automatically. If equations still don't render:
+Examify handles this automatically. If equations still don't render:
 
 1. Check Canvas has MathJax enabled
 2. Verify no conflicting HTML entities (`&lt;` vs `<`)
@@ -142,5 +142,5 @@ The converter handles this automatically. If equations still don't render:
 
 ### Need More Help?
 
-- [Open an issue](https://github.com/Data-Wise/canvas-examifyer/issues) on GitHub
+- [Open an issue](https://github.com/Data-Wise/examify/issues) on GitHub
 - Check the [Canvas QTI documentation](https://community.canvaslms.com/t5/Canvas-Basics-Guide/What-is-QTI/ta-p/2)

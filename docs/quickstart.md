@@ -1,13 +1,13 @@
 # Quick Start
 
-Get started with Canvas QTI Converter in 5 minutes.
+Get started with **Examify** in 5 minutes.
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/Data-Wise/canvas-examifyer.git
-cd canvas-examifyer
+git clone https://github.com/Data-Wise/examify.git
+cd examify
 
 # Install dependencies
 npm install

@@ -1,6 +1,6 @@
 # Supported Formats
 
-The converter accepts a simple Markdown-based format.
+**Examify** accepts a simple Markdown-based format.
 
 ## Structure
 
@@ -163,7 +163,7 @@ $$Y = \beta_0 + \beta_1 X + \epsilon$$
 3)  The error term
 ```
 
-The converter automatically converts:
+Examify automatically converts:
 
 - `$...$` → `\(...\)` (inline)
 - `$$...$$` → `\[...\]` (display)
@@ -208,7 +208,7 @@ quiz/
 ```
 
 !!! success "How It Works"
-    The converter:
+    Examify:
 
     1. Finds all `![alt](path)` references in your questions
     2. Copies the image files to an `images/` folder in the package
@@ -219,7 +219,7 @@ quiz/
 
 ## Solution Blocks
 
-The converter automatically ignores solution/proof blocks.
+Examify automatically ignores solution/proof blocks.
 
 ```html
 <div class="proof solution">

@@ -4,8 +4,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/Data-Wise/canvas-examifyer.git
-cd canvas-examifyer
+git clone https://github.com/Data-Wise/examify.git
+cd examify
 
 # Install dependencies
 npm install

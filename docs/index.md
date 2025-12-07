@@ -1,97 +1,141 @@
-# Canvas QTI Converter
+# Examify
 
-[![Version](https://img.shields.io/badge/version-0.2.2-blue)](https://github.com/Data-Wise/canvas-examifyer)
-[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/Data-Wise/canvas-examifyer/blob/main/LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org/)
+<div class="hero-section" markdown>
 
-<div class="feature-card" markdown>
-**🚀 Convert Markdown questions to Canvas-compatible QTI in seconds**
-
-Turn your simple Markdown files into fully-functional Canvas quiz packages.
+<div class="hero-badges" markdown>
+[![Version](https://img.shields.io/badge/version-0.4.0-7C3AED?style=for-the-badge)](https://github.com/Data-Wise/examify/releases)
+[![License](https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge)](https://github.com/Data-Wise/examify/blob/main/LICENSE)
+[![Node](https://img.shields.io/badge/node-≥18-3178C6?style=for-the-badge)](https://nodejs.org/)
+[![Tests](https://img.shields.io/badge/tests-32_passing-22C55E?style=for-the-badge)](https://github.com/Data-Wise/examify/actions)
 </div>
 
-## Features
+<div class="hero-tagline" markdown>
+## 🚀 Create Beautiful Exams from Markdown
+
+**Transform your plain text questions into Canvas-ready quiz packages in seconds.**  
+No XML. No hassle. Just Markdown.
+</div>
+
+</div>
+
+---
+
+## ✨ Features
 
 <div class="grid cards" markdown>
 
-- :material-file-document:{ .lg .middle } **Markdown First**
+- :material-file-document-edit:{ .lg .middle .feature-icon } **Markdown First**
 
     ---
 
-    Write questions in simple Markdown. No complex XML required.
+    Write questions in simple, readable Markdown. Focus on content, not formatting.
 
-- :material-math-integral:{ .lg .middle } **LaTeX Support**
-
-    ---
-
-    Full math equation support with `$...$` and `$$...$$` syntax.
-
-- :material-image:{ .lg .middle } **Image Support**
+- :material-math-integral:{ .lg .middle .feature-icon } **LaTeX Math**
 
     ---
 
-    Include images and R/Python-generated figures automatically.
+    Full equation support with `$...$` inline and `$$...$$` display math.
 
-- :material-shield-check:{ .lg .middle } **Canvas Emulator**
+- :material-image-multiple:{ .lg .middle .feature-icon } **Image Bundling**
 
     ---
 
-    Predict import success before uploading to Canvas.
+    Automatically packages images into Canvas-ready QTI with proper manifests.
+
+- :material-shield-check:{ .lg .middle .feature-icon } **Canvas Emulator**
+
+    ---
+
+    Predict import success *before* uploading. Catch errors early.
+
+- :material-format-list-checks:{ .lg .middle .feature-icon } **6 Question Types**
+
+    ---
+
+    Multiple choice, true/false, multiple answer, essay, short answer, and numeric.
+
+- :material-flash:{ .lg .middle .feature-icon } **Fast & Reliable**
+
+    ---
+
+    Built with TypeScript. Comprehensive test suite with 32 tests passing.
 
 </div>
 
-## Quick Install
+---
+
+## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/Data-Wise/canvas-examifyer.git
-cd canvas-examifyer
+# Clone and install
+git clone https://github.com/Data-Wise/examify.git
+cd examify
 npm install && npm run build && npm link
+
+# Convert your first quiz
+examify quiz.md -o scratch/quiz.qti.zip
 ```
 
-## Example
+---
+
+## 📝 Example
 
 === "Input (Markdown)"
 
     ```markdown
-    # Statistics Quiz
+    # Pool: Statistics Quiz
 
     # Section: Multiple Choice
 
-    ## 1. What is the mean of 2, 4, 6?
+    ## 1. What is the mean of 2, 4, 6? [2 pts]
 
     1)  Three
     2)  **Four** ✓
     3)  Five
     
     ## 2. [TF] Variance can be negative. → False
+
+    ## 3. [Essay, 5pts] Explain the Central Limit Theorem.
     ```
 
-=== "Output (Canvas)"
+=== "Output"
 
     ```text
-    ✓ Generated QTI 2.1 Package: quiz.qti.zip
-      • 2 questions
+    ✓ Generated QTI Package: scratch/quiz.qti.zip
+      • 3 questions (MC, TF, Essay)
       • 1 section
+      • 0 images bundled
     
-    ✅ PREDICTION: Canvas import will likely SUCCEED
+    ✅ Ready for Canvas import!
     ```
 
-## Commands
+---
+
+## 🎯 Commands
 
 | Command | Description |
 |---------|-------------|
-| `examify file.md` | Convert to QTI package |
-| `examify verify file.qti.zip` | Validate package structure |
-| `examify emulate-canvas file.qti.zip` | Predict Canvas import |
-| `examify check file.md` | Lint input file |
+| `examify file.md -o output.qti.zip` | Convert Markdown to QTI package |
+| `examify verify package.qti.zip` | Validate package structure |
+| `examify emulate-canvas package.qti.zip` | Simulate Canvas import |
+| `examify check file.md` | Lint input file for errors |
+| `examify file.md --preview` | Preview parsed questions |
 
-## What's New in v0.2.2
+---
 
-!!! tip "Latest Features"
-    - **`[correct]` marker** — Quarto-friendly way to mark answers
-    - **Canvas Emulator** — Predict import success
-    - **Enhanced validation** — Catches common import issues
-    - **Image optimization** — Canvas-compatible paths
+## 🆕 What's New in v0.4.0
 
-[Get Started :material-arrow-right:](quickstart.md){ .md-button .md-button--primary }
-[View on GitHub :material-github:](https://github.com/Data-Wise/canvas-examifyer){ .md-button }
+!!! success "Latest Release"
+    - **📦 Image Bundling** — Images properly packaged with `imsmanifest.xml`
+    - **🎨 Project Rename** — Now called **Examify**!
+    - **🔍 Enhanced Emulator** — Validates QTI 1.2 packages
+    - **✅ Canvas Tested** — Verified imports into Canvas LMS
+
+---
+
+<div class="cta-buttons" markdown>
+
+[Get Started :material-arrow-right:](quickstart.md){ .md-button .md-button--primary .md-button--lg }
+[View on GitHub :material-github:](https://github.com/Data-Wise/examify){ .md-button .md-button--lg }
+
+</div>
