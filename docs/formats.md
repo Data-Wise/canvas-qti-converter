@@ -177,6 +177,8 @@ Reference local images using standard Markdown syntax. Images are automatically 
 ```markdown
 ## 1. What does this graph show?
 
+The graph below represents population growth over time. Observe the trend line carefully.
+
 ![Graph](assets/graph.png)
 
 *a) Linear growth
@@ -190,8 +192,8 @@ b)  Exponential growth
 | PNG | `.png` | Recommended for charts |
 | JPEG | `.jpg`, `.jpeg` | Good for photos |
 | GIF | `.gif` | Animated supported |
-| SVG | `.svg` | Vector graphics |
-| WebP | `.webp` | Modern format |
+| SVG | `.svg` | Vector graphics (Canvas supported) |
+| WebP | `.webp` | Modern format (Canvas supported) |
 
 ### Path Requirements
 
