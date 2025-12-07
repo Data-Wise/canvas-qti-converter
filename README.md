@@ -21,7 +21,7 @@
 - **🧮 LaTeX Support**: Full support for math equations (`\( x^2 \)`) converted to Canvas format.
 - **🖼️ Image Support**: Automatically bundles referenced local images.
 - **🛡️ Built-in Validator**: `verify` command ensures your package imports cleanly.
-- **🔍 New in v0.2.1**: T/F arrow syntax (`-> True`) and smart solution block ignoring.
+- **🆕 v0.2.2**: `[correct]` marker for Quarto, `[MultiAns]`/`[TF]` type tags.
 
 ## 🚀 Quick Start
 

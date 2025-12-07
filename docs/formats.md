@@ -22,12 +22,13 @@ Instructions for this section.
 
 ### Multiple Choice
 
-Mark the correct answer with an asterisk `*`.
+Mark the correct answer with one of the supported markers.
 
 ```markdown
 1. What is 2 + 2?
    a) 3
    *b) 4
+   b) 4 [correct]
    c) 5
 
 2. What is variance?
@@ -36,7 +37,24 @@ Mark the correct answer with an asterisk `*`.
 ```
 
 > [!TIP]
-> You can mark correct answers with an asterisk `*` prefix OR a checkmark `✓` / `✔` suffix.
+> **Correct answer markers** (choose one):
+>
+> - `*b)` - Asterisk prefix
+> - `b) Answer ✓` - Checkmark suffix
+> - `b) Answer [correct]` - **Recommended for Quarto** (no conflicts)
+> - `b) **Answer**` - Bold text
+
+### Multiple Answers
+
+Use `[MultiAns]` tag for questions with multiple correct answers.
+
+```markdown
+3. [MultiAns] Which are measures of central tendency?
+   *a) Mean
+   *b) Median
+   c) Standard deviation
+   *d) Mode
+```
 
 ### True / False
 

@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2025-12-07
+
+### Added
+
+- **`[correct]` Marker**: New Quarto-friendly way to mark correct answers without conflicts.
+- **`[MultiAns]` Type**: Support for multiple-answer questions via `[MultiAns]` tag.
+- **Type Markers**: Inline `[TF]`, `[Essay]`, `[Short]`, `[Numeric]` markers in question headers.
+- **Canvas Import Emulator**: New `emulate-canvas` command predicts Canvas import success/failure.
+- **Enhanced Validator**: Canvas-specific checks for correct answers, interaction types, and images.
+
+### Fixed
+
+- **Parser**: `*a)` asterisk-prefix options now correctly mark answers.
+- **Parser**: Both `→` (Unicode) and `->` (ASCII) arrows work for T/F answers.
+- **Parser**: Standalone `*True`/`*False` options now parse correctly.
+
+### Tests
+
+- Added 8 new tests (32 total tests passing).
+
 ## [0.2.1] - 2025-12-06
 
 ### Fixed

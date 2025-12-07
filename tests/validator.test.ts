@@ -208,4 +208,68 @@ describe('QtiValidator', () => {
     expect(report.isValid).toBe(false);
     expect(report.errors.some(e => e.includes("Mismatch: Cardinality 'single'"))).toBe(true);
   });
+
+  // NEW: Canvas-specific validation tests
+  it('should fail if choice item has no correct answer defined', async () => {
+    mkdirSync(join(tempDir, 'items'));
+    writeFileSync(join(tempDir, 'imsmanifest.xml'), `
+      <manifest identifier="test" xmlns="...">
+        <resources>
+          <resource identifier="item_1" type="imsqti_item_xmlv2p1" href="items/no_answer.xml">
+            <file href="items/no_answer.xml"/>
+          </resource>
+        </resources>
+      </manifest>
+    `);
+    
+    // Item with choiceInteraction but no correctResponse value
+    writeFileSync(join(tempDir, 'items', 'no_answer.xml'), `
+      <assessmentItem identifier="item_1">
+        <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"><defaultValue><value>1</value></defaultValue></outcomeDeclaration>
+        <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="identifier">
+           <!-- Missing correctResponse! -->
+        </responseDeclaration>
+        <itemBody>
+           <choiceInteraction responseIdentifier="RESPONSE" maxChoices="1">
+             <simpleChoice identifier="A">Option A</simpleChoice>
+             <simpleChoice identifier="B">Option B</simpleChoice>
+           </choiceInteraction>
+        </itemBody>
+      </assessmentItem>
+    `);
+
+    const report = await validator.validatePackage(tempDir);
+    expect(report.isValid).toBe(false);
+    expect(report.errors.some(e => e.includes('No correct answer defined'))).toBe(true);
+  });
+
+  it('should error on unsupported Canvas interaction types', async () => {
+    mkdirSync(join(tempDir, 'items'));
+    writeFileSync(join(tempDir, 'imsmanifest.xml'), `
+      <manifest identifier="test" xmlns="...">
+        <resources>
+          <resource identifier="item_1" type="imsqti_item_xmlv2p1" href="items/unsupported.xml">
+            <file href="items/unsupported.xml"/>
+          </resource>
+        </resources>
+      </manifest>
+    `);
+    
+    // Item with unsupported orderInteraction
+    writeFileSync(join(tempDir, 'items', 'unsupported.xml'), `
+      <assessmentItem identifier="item_1">
+        <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"><defaultValue><value>1</value></defaultValue></outcomeDeclaration>
+        <itemBody>
+           <orderInteraction responseIdentifier="RESPONSE">
+             <simpleChoice identifier="A">First</simpleChoice>
+             <simpleChoice identifier="B">Second</simpleChoice>
+           </orderInteraction>
+        </itemBody>
+      </assessmentItem>
+    `);
+
+    const report = await validator.validatePackage(tempDir);
+    expect(report.isValid).toBe(false);
+    expect(report.errors.some(e => e.includes("Unsupported Canvas interaction 'orderInteraction'"))).toBe(true);
+  });
 });

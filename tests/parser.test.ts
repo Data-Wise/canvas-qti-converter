@@ -164,4 +164,113 @@ population variance.
     expect(q.options[0].text).toBe('True');
     expect(q.options[0].isCorrect).toBe(true);
   });
+
+  // NEW: Test for *a) asterisk prefix marking correct answer
+  it('should recognize *a) asterisk prefix as correct answer marker', () => {
+    const input = `
+# Multiple Choice
+
+## 1. What is the slope in regression?
+*a) The coefficient β₁
+b) The intercept
+c) The error term
+    `;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+    
+    expect(q.options[0].isCorrect).toBe(true);
+    expect(q.options[0].text).toBe('The coefficient β₁');
+    expect(q.options[1].isCorrect).toBe(false);
+    expect(q.options[2].isCorrect).toBe(false);
+  });
+
+  // NEW: Test for [TF] inline type marker
+  it('should parse [TF] marker to set true_false type', () => {
+    const input = `
+# Quiz
+
+## 3. [TF] The coefficient R² can never be negative.
+*True
+False
+    `;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+    
+    expect(q.type).toBe('true_false');
+    expect(q.stem).not.toContain('[TF]');
+    expect(q.stem).toBe('The coefficient R² can never be negative.');
+  });
+
+  // NEW: Test for [MultiAns] type marker
+  it('should parse [MultiAns] marker for multiple answer questions', () => {
+    const input = `
+# Quiz
+
+## 6. [MultiAns] Which are measures of central tendency?
+*a) Mean
+*b) Median
+c) Standard deviation
+*d) Mode
+    `;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+    
+    expect(q.type).toBe('multiple_answers');
+    expect(q.options[0].isCorrect).toBe(true);
+    expect(q.options[1].isCorrect).toBe(true);
+    expect(q.options[2].isCorrect).toBe(false);
+    expect(q.options[3].isCorrect).toBe(true);
+  });
+
+  // NEW: Test for [Essay, 10pts] combined marker
+  it('should parse [Essay, 10pts] combined type and points marker', () => {
+    const input = `
+# Quiz
+
+## 5. [Essay, 10pts] Explain the difference between correlation and causation.
+    `;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+    
+    expect(q.type).toBe('essay');
+    expect(q.stem).not.toContain('[Essay');
+    expect(q.stem).toBe('Explain the difference between correlation and causation.');
+  });
+
+  // NEW: Test for ASCII arrow (->) vs Unicode (→) equivalence
+  it('should handle both ASCII (->) and Unicode (→) arrows for T/F', () => {
+    const input = `
+# Section: True/False
+
+## 1. Water is wet. -> True
+
+## 2. Fire is cold. → False
+    `;
+    const result = parseMarkdown(input);
+    
+    expect(result.questions[0].options[0].isCorrect).toBe(true); // True
+    expect(result.questions[1].options[1].isCorrect).toBe(true); // False
+    expect(result.questions[0].stem).toBe('Water is wet.');
+    expect(result.questions[1].stem).toBe('Fire is cold.');
+  });
+
+  // NEW: Test for [correct] suffix marker (Quarto-friendly)
+  it('should recognize [correct] suffix as correct answer marker', () => {
+    const input = `
+# Quiz
+
+## 1. Which statement is true about R?
+a) R is a spreadsheet
+b) R is a programming language [correct]
+c) R is a database
+    `;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+    
+    expect(q.options[1].isCorrect).toBe(true);
+    expect(q.options[1].text).toBe('R is a programming language');
+    expect(q.options[1].text).not.toContain('[correct]');
+    expect(q.options[0].isCorrect).toBe(false);
+  });
 });
+

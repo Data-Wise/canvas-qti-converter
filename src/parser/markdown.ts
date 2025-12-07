@@ -7,10 +7,35 @@ import type { ParsedQuiz, Question, Section, AnswerOption, QuestionType } from '
 import { slugify } from './types.js';
 
 /**
+ * Extract inline type markers like [TF], [Essay], [MultiAns] from question title
+ * Returns the detected type and clean title without the marker
+ */
+function extractTypeMarker(title: string): { type: QuestionType | null; cleanTitle: string } {
+  // Match [TF], [Essay], [MultiAns], [Short], etc. with optional points
+  const markerMatch = title.match(/\[(TF|Essay|MultiAns|Short|Numeric)(?:,?\s*\d+\s*pts?)?\]/i);
+  if (markerMatch) {
+    const marker = markerMatch[1].toLowerCase();
+    const cleanTitle = title.replace(markerMatch[0], '').trim();
+    switch (marker) {
+      case 'tf': return { type: 'true_false', cleanTitle };
+      case 'essay': return { type: 'essay', cleanTitle };
+      case 'multians': return { type: 'multiple_answers', cleanTitle };
+      case 'short': return { type: 'short_answer', cleanTitle };
+      case 'numeric': return { type: 'numerical', cleanTitle };
+    }
+  }
+  return { type: null, cleanTitle: title };
+}
+
+/**
  * Parse question type from title or section context
  */
 function parseQuestionType(text: string, sectionTitle?: string): QuestionType {
   const lower = text.toLowerCase();
+  
+  // Check for inline type markers first (highest priority)
+  const { type: markerType } = extractTypeMarker(text);
+  if (markerType) return markerType;
   
   // Check question title for hints
   if (lower.includes('essay')) return 'essay';
@@ -52,37 +77,43 @@ function parseOptions(lines: string[]): AnswerOption[] {
     const trimmed = line.trim();
     if (!trimmed) continue;
     
-    // Match numbered options: 1) Answer, 2) Answer
-    const numMatch = trimmed.match(/^(\d+)\)\s+(.+)$/);
+    // Match numbered options: 1) Answer, 2) Answer, or *1) Answer (correct)
+    const numMatch = trimmed.match(/^(\*)?(\d+)\)\s+(.+)$/);
     if (numMatch) {
-      const text = numMatch[2];
-      // Check for correctness markers: **, ✓, or checkmark
-      const isCorrect = text.includes('**') || text.includes('✓') || text.includes('✔');
+      const hasAsteriskPrefix = !!numMatch[1];
+      const text = numMatch[3];
+      // Check for correctness markers: leading *, **, ✓, checkmark, or [correct] suffix
+      const hasCorrectSuffix = /\[correct\]\s*$/i.test(text);
+      const isCorrect = hasAsteriskPrefix || hasCorrectSuffix || text.includes('**') || text.includes('✓') || text.includes('✔');
       const cleanText = text
         .replace(/\*\*/g, '')
         .replace(/[✓✔]/g, '')
+        .replace(/\s*\[correct\]\s*$/i, '')
         .trim();
       options.push({
-        id: String.fromCharCode(96 + parseInt(numMatch[1])), // 1->a, 2->b, etc.
+        id: String.fromCharCode(96 + parseInt(numMatch[2])), // 1->a, 2->b, etc.
         text: cleanText,
         isCorrect
       });
       continue;
     }
     
-    // Match lettered options: a) Answer, b) Answer
-    const letterMatch = trimmed.match(/^([a-e])\)\s+(.+)$/i);
+    // Match lettered options: a) Answer, b) Answer, or *a) Answer (correct)
+    const letterMatch = trimmed.match(/^(\*)?([a-e])\)\s+(.+)$/i);
     if (letterMatch) {
-      const text = letterMatch[2];
-      // Check for correctness markers: **, *, ✓
-      const isCorrect = text.includes('**') || text.startsWith('*') || text.includes('✓') || text.includes('✔');
+      const hasAsteriskPrefix = !!letterMatch[1];
+      const text = letterMatch[3];
+      // Check for correctness markers: leading *, **, ✓, or [correct] suffix
+      const hasCorrectSuffix = /\[correct\]\s*$/i.test(text);
+      const isCorrect = hasAsteriskPrefix || hasCorrectSuffix || text.includes('**') || text.startsWith('*') || text.includes('✓') || text.includes('✔');
       const cleanText = text
         .replace(/\*\*/g, '')
         .replace(/^\*/, '')
         .replace(/[✓✔]/g, '')
+        .replace(/\s*\[correct\]\s*$/i, '')
         .trim();
       options.push({
-        id: letterMatch[1].toLowerCase(),
+        id: letterMatch[2].toLowerCase(),
         text: cleanText,
         isCorrect
       });
@@ -98,6 +129,19 @@ function parseOptions(lines: string[]): AnswerOption[] {
       options.push({
         id: String.fromCharCode(97 + options.length), // a, b, c, ...
         text: cleanText,
+        isCorrect
+      });
+      continue;
+    }
+    
+    // Match standalone True/False options: *True, *False, True, False (for T/F questions)
+    const tfMatch = trimmed.match(/^(\*)?(True|False)$/i);
+    if (tfMatch) {
+      const isCorrect = !!tfMatch[1]; // Has leading asterisk
+      const text = tfMatch[2]; // True or False
+      options.push({
+        id: text.toLowerCase() === 'true' ? 'a' : 'b',
+        text: text.charAt(0).toUpperCase() + text.slice(1).toLowerCase(),
         isCorrect
       });
       continue;
@@ -271,13 +315,21 @@ export function parseMarkdown(content: string): ParsedQuiz {
       finalizeQuestion();
       
       const questionNum = parseInt(h2Match[1], 10);
-      const { points, cleanTitle } = extractPoints(h2Match[2]);
-      const type = parseQuestionType(cleanTitle, currentSection?.title);
+      let rawTitle = h2Match[2];
+      
+      // Extract inline type markers [TF], [Essay], [MultiAns] first
+      const { type: markerType, cleanTitle: titleAfterMarker } = extractTypeMarker(rawTitle);
+      
+      // Then extract points
+      const { points, cleanTitle } = extractPoints(titleAfterMarker);
+      
+      // Determine type from marker, title content, or section
+      const type = markerType || parseQuestionType(cleanTitle, currentSection?.title);
       
       // Strip arrow markers from title (e.g., "Statement → True" becomes "Statement")
-      // But preserve the answer for T/F auto-generation
+      // Handle both → (unicode) and -> (ascii)
       let stemText = cleanTitle;
-      const arrowMatch = cleanTitle.match(/\s*[→\->]\s*(True|False)\s*$/i);
+      const arrowMatch = cleanTitle.match(/\s*(?:→|->)\s*(True|False)\s*$/i);
       if (arrowMatch) {
         stemText = cleanTitle.replace(arrowMatch[0], '').trim();
         // Append hidden answer marker for finalizeQuestion to pick up
@@ -307,8 +359,14 @@ export function parseMarkdown(content: string): ParsedQuiz {
       continue;
     }
     
-    // Option lines (numbered or lettered)
-    if (currentQuestion && trimmed.match(/^(\d+|[a-e])\)\s+/i)) {
+    // Option lines (numbered or lettered, optionally with leading asterisk for correct marker)
+    if (currentQuestion && trimmed.match(/^\*?(\d+|[a-e])\)\s+/i)) {
+      currentQuestionLines.push(trimmed);
+      continue;
+    }
+    
+    // Standalone True/False options (*True, *False, True, False)
+    if (currentQuestion && trimmed.match(/^\*?(True|False)$/i)) {
       currentQuestionLines.push(trimmed);
       continue;
     }

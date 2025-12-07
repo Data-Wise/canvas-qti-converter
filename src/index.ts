@@ -15,7 +15,7 @@ const program = new Command();
 program
   .name('qti-convert')
   .description('Convert Markdown/Text questions to Canvas QTI 2.1 format')
-  .version('0.2.1');
+  .version('0.2.2');
 
 program
   .command('verify')
@@ -39,6 +39,75 @@ program
     } else {
       console.error('✗ Validation FAILED');
       report.errors.forEach(e => console.error(`  - ${e}`));
+      process.exit(1);
+    }
+  });
+
+program
+  .command('emulate-canvas')
+  .description('Simulate Canvas LMS import and predict success/failure')
+  .argument('<path>', 'Path to QTI zip or directory')
+  .action(async (path: string) => {
+    console.log(`\n🎓 Canvas Import Emulator\n`);
+    console.log(`Analyzing: ${path}\n`);
+    
+    const validator = new QtiValidator();
+    const report = await validator.validatePackage(path);
+    
+    // Canvas-specific analysis
+    const canvasErrors = report.errors.filter(e => 
+      e.includes('No correct answer') || 
+      e.includes('Unsupported Canvas') ||
+      e.includes('Missing image') ||
+      e.includes('Mismatch: Cardinality')
+    );
+    
+    const canvasWarnings = report.warnings.filter(w =>
+      w.includes('responseProcessing') ||
+      w.includes('limited Canvas support')
+    );
+    
+    console.log(`📊 Analysis Results:`);
+    console.log(`   Items scanned: ${report.details.itemCount}`);
+    console.log(`   Resources: ${report.details.resourceCount}`);
+    console.log(`   Has test structure: ${report.details.testFound ? 'Yes' : 'No'}`);
+    
+    if (canvasErrors.length === 0 && report.errors.length === 0) {
+      console.log(`\n✅ PREDICTION: Canvas import will likely SUCCEED`);
+      
+      if (canvasWarnings.length > 0) {
+        console.log(`\n⚠️  Warnings (may need attention):`);
+        canvasWarnings.forEach(w => console.log(`   • ${w}`));
+      }
+    } else {
+      console.log(`\n❌ PREDICTION: Canvas import will likely FAIL`);
+      
+      console.log(`\n🔴 Canvas Import Blockers:`);
+      canvasErrors.forEach(e => console.log(`   • ${e}`));
+      
+      // Provide actionable fixes
+      console.log(`\n🔧 Suggested Fixes:`);
+      
+      if (canvasErrors.some(e => e.includes('No correct answer'))) {
+        console.log(`   → Mark correct answers with [correct], ✓, or **bold**`);
+      }
+      if (canvasErrors.some(e => e.includes('Unsupported Canvas'))) {
+        console.log(`   → Use choiceInteraction (MC/TF) or textEntryInteraction (short answer)`);
+      }
+      if (canvasErrors.some(e => e.includes('Missing image'))) {
+        console.log(`   → Ensure all image files are bundled in the items/ folder`);
+        console.log(`   → For R/Python figures, verify they are generated before conversion`);
+      }
+      if (canvasErrors.some(e => e.includes('Mismatch: Cardinality'))) {
+        console.log(`   → Fix cardinality/maxChoices mismatch in response declarations`);
+      }
+      
+      if (report.errors.length > canvasErrors.length) {
+        console.log(`\n🔴 Other Errors:`);
+        report.errors.filter(e => !canvasErrors.includes(e))
+          .forEach(e => console.log(`   • ${e}`));
+      }
+      
       process.exit(1);
     }
   });

@@ -190,8 +190,68 @@ export class QtiValidator {
                           }
                         }
                      }
-                   }
-                 }
+                      
+                      // CANVAS CHECK: Correct answer detection
+                      const correctResponse = responseDecl.correctResponse;
+                      const hasCorrectAnswer = correctResponse?.value && 
+                        (Array.isArray(correctResponse.value) ? correctResponse.value.length > 0 : true);
+                      
+                      if (!hasCorrectAnswer && body?.choiceInteraction) {
+                        report.errors.push(`Canvas import will fail: No correct answer defined in ${fileHref}`);
+                      }
+                    }
+                    
+                    // CANVAS CHECK: ResponseProcessing for auto-grading
+                    const respProc = item.responseProcessing;
+                    const body = item.itemBody; // Re-declare body for this scope if not already in scope
+                    const hasChoiceInteraction = body?.choiceInteraction;
+                    
+                    if (!respProc && hasChoiceInteraction) {
+                      report.warnings.push(`Missing responseProcessing (may need manual grading): ${fileHref}`);
+                    }
+                    
+                    // CANVAS CHECK: Interaction type support
+                    if (body) {
+                      const unsupportedInteractions = [
+                        'gapMatchInteraction',
+                        'orderInteraction', 
+                        'associateInteraction',
+                        'graphicGapMatchInteraction',
+                        'hotspotInteraction'
+                      ];
+                      for (const interaction of unsupportedInteractions) {
+                        if (body[interaction]) {
+                          report.errors.push(`Unsupported Canvas interaction '${interaction}' in ${fileHref}`);
+                        }
+                      }
+                      
+                      // Warn about limited support
+                      if (body.matchInteraction) {
+                        report.warnings.push(`matchInteraction has limited Canvas support: ${fileHref}`);
+                      }
+                      
+                      // CANVAS CHECK: Image reference validation
+                      // Extract img src from itemBody content
+                      const bodyContent = JSON.stringify(body);
+                      const imgMatches = bodyContent.match(/src=\\"([^"]+)\\"/g) || [];
+                      const imgSrcMatches = bodyContent.match(/<img[^>]+src=["']([^"']+)["']/gi) || [];
+                      
+                      // Also check for object/embed elements (for embedded media)
+                      const allMediaRefs = [...imgMatches, ...imgSrcMatches];
+                      for (const ref of allMediaRefs) {
+                        const srcMatch = ref.match(/["']([^"']+\.(?:png|jpg|jpeg|gif|svg|webp))["']/i);
+                        if (srcMatch) {
+                          const imgPath = srcMatch[1];
+                          // Check if image file exists relative to items folder
+                          const fullImgPath = join(checkDir, 'items', imgPath);
+                          const altImgPath = join(checkDir, imgPath);
+                          if (!existsSync(fullImgPath) && !existsSync(altImgPath)) {
+                            report.errors.push(`Missing image file '${imgPath}' referenced in ${fileHref}`);
+                          }
+                        }
+                      }
+                    }
+                  }
                } else if (type === 'imsqti_test_xmlv2p1') {
                  if (!xmlJson.assessmentTest) {
                     report.errors.push(`Invalid Test XML (missing assessmentTest): ${fileHref}`);
