@@ -49,6 +49,7 @@ npm link         # Install globally as 'examify'
 - **Build before testing**: `npm run build`
 - **QTI format**: Uses QTI 1.2 (Canvas Classic Quizzes), not QTI 2.1
 - **Images**: Bundled in package with `imsmanifest.xml`
+- **Always work on `dev` branch**: All development MUST happen on `dev` branch. Only merge to `main` for releases.
 
 ## Architecture
 
@@ -147,6 +148,6 @@ b)  Exponential growth
 
 ## Git Status
 
-- **Branch**: main
+- **Branch**: dev
 - **Latest tag**: v0.4.0
-- **Remote**: origin/main (synced)
+- **Remote**: origin/dev (active)
