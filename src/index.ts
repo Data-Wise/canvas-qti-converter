@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, mkdtempSync, rmSync, mkdirSync, copyFileSy
 import { tmpdir } from 'os';
 import { join, basename, dirname, resolve } from 'path';
 import { parseMarkdown } from './parser/markdown.js';
-import { generateItem, generateTest, generateManifest21 } from './generator/qti21.js';
+import { generateQTI } from './generator/qti.js';
 import { QtiValidator } from './diagnostic/validator.js';
 import { lintMarkdown } from './diagnostic/linter.js';
 import { execSync } from 'child_process';
@@ -14,8 +14,8 @@ const program = new Command();
 
 program
   .name('qti-convert')
-  .description('Convert Markdown/Text questions to Canvas QTI 2.1 format')
-  .version('0.2.2');
+  .description('Convert Markdown/Text questions to Canvas QTI 1.2 format')
+  .version('0.3.0');
 
 program
   .command('verify')
@@ -171,71 +171,27 @@ program
         return;
       }
 
-      // Create QTI 2.1 package with proper folder structure
-      const tempDir = mkdtempSync(join(tmpdir(), 'qti21-'));
-      const itemsDir = join(tempDir, 'items');
-      const testsDir = join(tempDir, 'tests');
+      // Create QTI 1.2 package (Canvas Classic Quizzes format)
+      const tempDir = mkdtempSync(join(tmpdir(), 'qti12-'));
       
       try {
-        // Create folder structure
-        mkdirSync(itemsDir, { recursive: true });
-        const imagesDir = join(itemsDir, 'images');
-        mkdirSync(imagesDir, { recursive: true });
-        mkdirSync(testsDir, { recursive: true });
+        // Generate QTI 1.2 XML (single file format like Canvas exports)
+        const { qti, assessmentIdent } = generateQTI(parsed);
         
-        // Process images and write item files
-        for (const question of parsed.questions) {
-          // Handle images if present
-          if (question.images && question.images.length > 0) {
-            const inputDir = join(process.cwd(), dirname(input)); // input path might be relative
-            
-            question.images = question.images.map(imgRef => {
-              try {
-                // Resolve source path
-                // Handle absolute paths or relative to input file
-                const srcPath = join(dirname(input), imgRef); // Use raw input path for resolution
-                if (existsSync(srcPath)) {
-                   const imgName = basename(srcPath);
-                   const destPath = join(imagesDir, imgName);
-                   copyFileSync(srcPath, destPath);
-                   
-                   // Update path in stem/options to be relative for the XML (images/name.png)
-                   const relativeRef = `images/${imgName}`;
-                   question.stem = question.stem.replace(imgRef, relativeRef);
-                   return relativeRef;
-                } else {
-                  console.warn(`Warning: Image not found: ${srcPath}`);
-                  return imgRef;
-                }
-              } catch (e) {
-                console.warn(`Warning: Failed to process image ${imgRef}`, e);
-                return imgRef;
-              }
-            });
-          }
-
-          const itemXml = generateItem(question, parsed.title);
-          writeFileSync(join(itemsDir, `item_${question.id}.xml`), itemXml);
-        }
-        
-        // Generate and write test.xml
-        const testXml = generateTest(parsed);
-        writeFileSync(join(testsDir, 'test.xml'), testXml);
-        
-        // Generate and write imsmanifest.xml
-        const manifestXml = generateManifest21(parsed);
-        writeFileSync(join(tempDir, 'imsmanifest.xml'), manifestXml);
+        // Write the QTI XML file
+        const qtiFilename = `${parsed.title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}.xml`;
+        writeFileSync(join(tempDir, qtiFilename), qti);
         
         // Create zip file
         const outputZip = options.output || input.replace(/\.(md|txt)$/, '.qti.zip');
         
-        // Use zip command to create package (zip the contents, not the folder)
+        // Use zip command to create package
         execSync(`cd "${tempDir}" && zip -r "${process.cwd()}/${outputZip}" .`, { stdio: 'pipe' });
         
-        console.log(`✓ Generated QTI 2.1 Package: ${outputZip}`);
+        console.log(`✓ Generated QTI 1.2 Package: ${outputZip}`);
         console.log(`  • ${parsed.questions.length} questions`);
         console.log(`  • ${parsed.sections.length} sections`);
-        console.log(`  • Folder structure: items/, tests/, imsmanifest.xml`);
+        console.log(`  • Format: Canvas Classic Quizzes compatible`);
         
       } finally {
         // Clean up temp directory

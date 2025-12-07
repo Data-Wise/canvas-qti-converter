@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2025-12-07
+
+### Changed
+
+- **BREAKING: Switched to QTI 1.2 format** for Canvas Classic Quizzes compatibility.
+  - Canvas imports QTI 1.2 to Question Banks correctly.
+  - Previous QTI 2.1 format was not being imported by Canvas.
+- Output is now a single XML file in a zip (matching Canvas export format).
+
+### Fixed
+
+- Questions now import correctly into Canvas Question Banks.
+
+### Technical
+
+- Replaced `qti21.js` generator with `qti.js` (QTI 1.2).
+- Generates Canvas-compatible `<questestinterop>` format.
+
+---
+
 ## [0.2.2] - 2025-12-07
 
 ### Added

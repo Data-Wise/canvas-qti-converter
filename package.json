@@ -1,6 +1,6 @@
 {
   "name": "canvas-qti-converter",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Convert Markdown/Text question files to Canvas-compatible QTI format",
   "main": "dist/index.js",
   "bin": {
