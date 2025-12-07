@@ -90,4 +90,78 @@ Water is dry. -> False
     expect(q2.options[1].text).toBe('False');
     expect(q2.options[1].isCorrect).toBe(true);
   });
+
+  // NEW: Test for checkmark stripping (Canvas compatibility)
+  it('should strip ✓ checkmarks from options and mark them correct', () => {
+    const input = `
+# Multiple Choice
+
+## 1. What is variance?
+1) Sum of squares
+2) Average squared deviation from mean ✓
+3) Standard deviation
+4) Range
+    `;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+    
+    // The ✓ should be stripped from option text
+    expect(q.options[1].text).toBe('Average squared deviation from mean');
+    expect(q.options[1].text).not.toContain('✓');
+    // And the option should be marked correct
+    expect(q.options[1].isCorrect).toBe(true);
+  });
+
+  // NEW: Test for solution block skipping
+  it('should skip HTML solution blocks entirely', () => {
+    const input = `
+# Multiple Choice
+
+## 1. What is variance?
+1) Sum of squares
+2) **Average squared deviation**
+
+<div class="proof solution">
+
+<span class="proof-title">*Solution*. </span>Variance measures the
+average squared deviation from the mean. The formula divides by N for
+population variance.
+
+</div>
+
+## 2. Second question
+1) A
+2) **B**
+    `;
+    const result = parseMarkdown(input);
+    const q1 = result.questions[0];
+    
+    // Solution text should NOT appear in stem
+    expect(q1.stem).not.toContain('deviation from the mean');
+    expect(q1.stem).not.toContain('Solution');
+    expect(q1.stem).not.toContain('population variance');
+    
+    // Both questions should parse correctly
+    expect(result.questions).toHaveLength(2);
+  });
+
+  // NEW: Ensure → True marker is removed from T/F stems
+  it('should clean arrow markers from True/False question stems', () => {
+    const input = `
+# Section: True/False
+
+## 1. R squared can range from 0 to 1. → True
+    `;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+    
+    // The → True should be stripped from the stem
+    expect(q.stem).not.toContain('→');
+    expect(q.stem).not.toContain('True');
+    expect(q.stem).toBe('R squared can range from 0 to 1.');
+    
+    // But the answer should be captured
+    expect(q.options[0].text).toBe('True');
+    expect(q.options[0].isCorrect).toBe(true);
+  });
 });

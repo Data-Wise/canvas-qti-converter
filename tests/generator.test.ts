@@ -8,7 +8,7 @@ const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_
 
 describe('QTI Generator', () => {
   const mockQuestion: Question = {
-    id: '1',
+    id: 1,
     type: 'multiple_choice',
     stem: 'What is 1+1?',
     points: 1,
@@ -16,7 +16,7 @@ describe('QTI Generator', () => {
       { id: 'a', text: '1', isCorrect: false },
       { id: 'b', text: '2', isCorrect: true }
     ],
-    sections: []
+    section: undefined
   };
 
   const mockQuiz: ParsedQuiz = {
@@ -49,7 +49,7 @@ describe('QTI Generator', () => {
   describe('generateManifest', () => {
     it('should generate valid imsmanifest.xml', () => {
       const xml = generateManifest21(mockQuiz);
-      expect(xml).toContain('identifier="item_1"');
+      expect(xml).toContain('identifier="res_item_1"');
       expect(xml).toContain('type="imsqti_item_xmlv2p1"');
 
       // Validate XML structure

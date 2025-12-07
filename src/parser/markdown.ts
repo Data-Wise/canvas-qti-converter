@@ -56,8 +56,12 @@ function parseOptions(lines: string[]): AnswerOption[] {
     const numMatch = trimmed.match(/^(\d+)\)\s+(.+)$/);
     if (numMatch) {
       const text = numMatch[2];
-      const isCorrect = text.includes('**') && text.includes('**');
-      const cleanText = text.replace(/\*\*/g, '').trim();
+      // Check for correctness markers: **, ✓, or checkmark
+      const isCorrect = text.includes('**') || text.includes('✓') || text.includes('✔');
+      const cleanText = text
+        .replace(/\*\*/g, '')
+        .replace(/[✓✔]/g, '')
+        .trim();
       options.push({
         id: String.fromCharCode(96 + parseInt(numMatch[1])), // 1->a, 2->b, etc.
         text: cleanText,
@@ -70,8 +74,13 @@ function parseOptions(lines: string[]): AnswerOption[] {
     const letterMatch = trimmed.match(/^([a-e])\)\s+(.+)$/i);
     if (letterMatch) {
       const text = letterMatch[2];
-      const isCorrect = text.includes('**') || text.startsWith('*');
-      const cleanText = text.replace(/\*\*/g, '').replace(/^\*/, '').trim();
+      // Check for correctness markers: **, *, ✓
+      const isCorrect = text.includes('**') || text.startsWith('*') || text.includes('✓') || text.includes('✔');
+      const cleanText = text
+        .replace(/\*\*/g, '')
+        .replace(/^\*/, '')
+        .replace(/[✓✔]/g, '')
+        .trim();
       options.push({
         id: letterMatch[1].toLowerCase(),
         text: cleanText,
@@ -144,6 +153,7 @@ export function parseMarkdown(content: string): ParsedQuiz {
   let currentQuestionLines: string[] = [];
   let questionCounter = 0;
   let inCoverPage = true; // Skip cover page content
+  let inSolutionBlock = false; // Track when inside <div class="solution">...</div>
   
   const finalizeQuestion = () => {
     if (!currentQuestion || !currentQuestion.stem) {
@@ -210,6 +220,19 @@ export function parseMarkdown(content: string): ParsedQuiz {
       continue;
     }
     
+    // Track solution blocks: <div class="proof solution"> ... </div>
+    if (trimmed.includes('<div') && (trimmed.includes('solution') || trimmed.includes('proof'))) {
+      inSolutionBlock = true;
+      continue;
+    }
+    if (trimmed.includes('</div>') && inSolutionBlock) {
+      inSolutionBlock = false;
+      continue;
+    }
+    if (inSolutionBlock) {
+      continue; // Skip all content inside solution blocks
+    }
+    
     // Skip callout blocks, solution blocks, and other metadata (checked early to exclude from stem)
     if (trimmed.startsWith('>') || trimmed.startsWith(':::') || trimmed.includes('class=')) {
       continue;
@@ -251,11 +274,21 @@ export function parseMarkdown(content: string): ParsedQuiz {
       const { points, cleanTitle } = extractPoints(h2Match[2]);
       const type = parseQuestionType(cleanTitle, currentSection?.title);
       
+      // Strip arrow markers from title (e.g., "Statement → True" becomes "Statement")
+      // But preserve the answer for T/F auto-generation
+      let stemText = cleanTitle;
+      const arrowMatch = cleanTitle.match(/\s*[→\->]\s*(True|False)\s*$/i);
+      if (arrowMatch) {
+        stemText = cleanTitle.replace(arrowMatch[0], '').trim();
+        // Append hidden answer marker for finalizeQuestion to pick up
+        stemText += ` -> ${arrowMatch[1]}`;
+      }
+      
       questionCounter++;
       currentQuestion = {
         id: questionNum || questionCounter,
         type,
-        stem: cleanTitle,
+        stem: stemText,
         points: points || defaultPoints,
       };
       continue;
