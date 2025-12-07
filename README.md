@@ -2,93 +2,158 @@
 
 <div align="center">
 
-![Examify Logo](https://img.shields.io/badge/Examify-v0.4.0-7C3AED?style=for-the-badge&logo=markdown&logoColor=white)
+![Examify Hero](https://capsule-render.vercel.app/api?type=waving&color=7C3AED&height=200&section=header&text=Examify&fontSize=90&animation=fadeIn&fontAlignY=35&desc=Beautiful%20Exams,%20Zero%20Friction&descAlignY=55&descSize=20&fontColor=ffffff)
 
+<div style="margin-top: 20px">
+
+[![Version](https://img.shields.io/badge/Examify-v0.4.0-7C3AED?style=for-the-badge&logo=markdown&logoColor=white)](https://github.com/Data-Wise/examify/releases)
 [![License](https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-32%20passing-22C55E?style=for-the-badge)](https://github.com/Data-Wise/examify/actions)
-[![Node](https://img.shields.io/badge/node-≥18-3178C6?style=for-the-badge)](https://nodejs.org/)
+[![Tests](https://img.shields.io/badge/tests-32%20passing-3178C6?style=for-the-badge)](https://github.com/Data-Wise/examify/actions)
 
-**Create beautiful exams from Markdown and export to Canvas QTI format.**
+</div>
 
-[📖 Read the Documentation](https://data-wise.github.io/examify/) • [🐛 Report Bug](https://github.com/Data-Wise/examify/issues) • [💡 Request Feature](https://github.com/Data-Wise/examify/issues)
+<p align="center" style="font-size: 1.2rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+  <strong>Transform your Markdown & Quarto documents into Canvas-ready exams.</strong><br>
+  No more manual data entry. No more broken images. Just write and publish.
+</p>
+
+[📖 Documentation](https://data-wise.github.io/examify/) • [📦 Quarto Extension](https://data-wise.github.io/examify/extensions/quarto/) • [🐛 Report Bug](https://github.com/Data-Wise/examify/issues)
 
 </div>
 
 ---
 
+## ⚡ The Ecosystem
+
+Examify isn't just a converter; it's a complete workflow for modern assessment authoring.
+
+| **Examify CLI** | **Quarto Extension** |
+|:---:|:---:|
+| 💻 **For Developers & Authors** | 🧪 **For Data Scientists** |
+| Convert any Markdown file to QTI. | Author in `.qmd` with R/Python code. |
+| Automated image bundling. | Seamless render-to-exam workflow. |
+| `examify quiz.md` | `quarto render exam.qmd` |
+
+---
+
 ## ✨ Features
 
-- **📝 Markdown First**: Write questions in simple, readable Markdown. Focus on content, not XML.
-- **🧮 LaTeX Support**: Full equation support. We convert `$...$` to Canvas's expected format automatically.
-- **🖼️ Image Bundling**: References to local images? We bundle them into the QTI package with a proper manifest.
-- **🎓 Canvas Emulator**: Predict import success **before** you upload. Save hours of debugging.
-- **🛡️ 6 Question Types**: Multiple Choice, True/False, Multiple Answer, Essay, Short Answer, and Numeric.
+<table>
+<tr>
+<td width="50%">
+
+### 📝 Markdown First
+
+Write questions in specific, clean Markdown. No XML, no GUI clicking. Focus on your content.
+
+</td>
+<td width="50%">
+
+### 🧮 LaTeX Native
+
+Full support for inline `$...$` and display `$$...$$` math. We handle the complex conversion to Canvas HTML automatically.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🖼️ Auto-Bundle Images
+
+Reference local images (`![Graph](graph.png)`). We automatically package them with `imsmanifest.xml` so they just work.
+
+</td>
+<td width="50%">
+
+### 🎓 Import Emulator
+
+Predict import success *before* you upload. Our emulator validates your package against Canvas strict requirements.
+
+</td>
+</tr>
+</table>
+
+---
 
 ## 🚀 Quick Start
 
+### 1. Installation
+
 ```bash
-# 1. Install
+# Clone and link (Recommended for now)
 git clone https://github.com/Data-Wise/examify.git
 cd examify
 npm install && npm run build && npm link
-
-# 2. Convert your quiz
-examify quiz.md -o quiz.qti.zip
-
-# 3. Simulate import (optional but recommended)
-examify emulate-canvas quiz.qti.zip
 ```
 
-## 📝 Input Format
+### 2. Create Your Exam
 
-Questions must start with `## N.` (double hash + number + dot).
+Write your questions in `exam.md`:
 
 ```markdown
-# Statistics Quiz
+# Section: Multiple Choice
 
-## 1. What is the mean of 2, 4, 6? [2 pts]
-a) 3
-b) **4** ✓
-c) 5
+## 1. Which statistical test compares two means? [2 pts]
+a) Chi-Square
+b) **T-Test** ✓
+c) ANOVA
 
-## 2. [TF] The sky is green. → False
-
-## 3. [Essay, 10pts] Explain the Central Limit Theorem.
+## 2. [Essay, 10pts] Explain P-Values.
 ```
 
-[View all supported formats in the docs →](https://data-wise.github.io/examify/formats/)
-
-## 📦 Quarto Extension
-
-Examify includes a powerful Quarto extension for authoring exams in `.qmd` files.
+### 3. Convert & Verify
 
 ```bash
-# Install extension
+# Generate QTI Package
+examify exam.md -o exam.qti.zip
+
+# Check compatibility (Optional)
+examify emulate-canvas exam.qti.zip
+```
+
+### 4. Import to Canvas
+
+Upload `exam.qti.zip` to **Settings > Import Course Content > QTI .zip file**.
+
+---
+
+## 📦 For Quarto Users
+
+If you use RStudio or Quarto, installing our extension is the best way to work.
+
+```bash
+# Install the extension
 quarto add Data-Wise/examify
-
-# Render to Examify-ready Markdown
-quarto render exam.qmd --to exam-gfm
 ```
 
-[Learn more about the Quarto Extension →](https://data-wise.github.io/examify/extensions/quarto/)
+Then in your YAML header:
 
-## 🔧 Commands
-
-| Command | Description |
-|---------|-------------|
-| `examify <file.md>` | Convert Markdown to QTI package |
-| `examify verify <file.zip>` | Validate package structure & diagnostics |
-| `examify emulate-canvas <file.zip>` | Simulate Canvas import process |
-| `examify check <file.md>` | Lint input file for syntax errors |
-
-## 🛠️ Development
-
-```bash
-npm install      # Install dependencies
-npm run build    # Build project
-npm test         # Run tests (32 passing)
+```yaml
+title: "Final Exam"
+format:
+  exam-gfm: default  # Generates QTI-ready Markdown
+  exam-pdf: default  # Generates printable PDF
 ```
 
-## 📄 License
+[Read the Quarto Guide →](https://data-wise.github.io/examify/extensions/quarto/)
 
-MIT © [MediationVerse Team](https://github.com/Data-Wise)
+---
+
+## 💻 Commands
+
+| Command | Usage | Description |
+|:---|:---|:---|
+| **Convert** | `examify <file> [options]` | Main conversion tool. |
+| **Verify** | `examify verify <zip>` | Validates QTI structure and manifests. |
+| **Emulate** | `examify emulate-canvas <zip>` | Simulates Canvas import process. |
+| **Check** | `examify check <file>` | Lints source file for syntax errors. |
+
+---
+
+<div align="center">
+
+**[Explore Full Documentation ↗](https://data-wise.github.io/examify/)**
+
+<sub>Built with ❤️ by the MediationVerse Team • Licensed under MIT</sub>
+
+</div>
