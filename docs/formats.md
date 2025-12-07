@@ -29,7 +29,14 @@ Mark the correct answer with an asterisk `*`.
    a) 3
    *b) 4
    c) 5
+
+2. What is variance?
+   a) Sum of squares
+   b) Average squared deviation ✓
 ```
+
+> [!TIP]
+> You can mark correct answers with an asterisk `*` prefix OR a checkmark `✓` / `✔` suffix.
 
 ### True / False
 
@@ -39,7 +46,12 @@ Use `[TF]` tag.
 2. [TF] The sky is blue.
    *True
    False
+
+3. Water is wet. -> True
 ```
+
+> [!TIP]
+> You can also use arrow syntax `-> True` or `→ True` in the question header or text to automatically mark the answer.
 
 ### Essay
 
@@ -72,3 +84,15 @@ Reference local images using standard Markdown syntax. They will be bundled into
    *a) Linear growth
    b) Exponential growth
 ```
+
+## Ignored Content
+
+The converter automatically skips solution blocks to prevent them from leaking into question text.
+
+```html
+<div class="solution">
+  <p>This text will be completely ignored.</p>
+</div>
+```
+
+Any content inside `<div class="solution">` or `<div class="proof">` is discarded.
