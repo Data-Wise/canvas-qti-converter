@@ -53,21 +53,22 @@ npm install && npm run build && npm link
 === "Input (Markdown)"
 
     ```markdown
-    # Pool: Statistics Quiz
+    # Statistics Quiz
+
+    # Section: Multiple Choice
 
     ## 1. What is the mean of 2, 4, 6?
-    a) 3
-    b) 4 [correct]
-    c) 5
+
+    1)  Three
+    2)  **Four** ✓
+    3)  Five
     
-    ## 2. [TF] Variance can be negative.
-    *False
-    True
+    ## 2. [TF] Variance can be negative. → False
     ```
 
 === "Output (Canvas)"
 
-    ```
+    ```text
     ✓ Generated QTI 2.1 Package: quiz.qti.zip
       • 2 questions
       • 1 section
