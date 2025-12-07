@@ -24,7 +24,7 @@ qti-convert emulate-canvas your-package.qti.zip
 
 ### Success
 
-```
+```text
 🎓 Canvas Import Emulator
 
 📊 Analysis Results:
@@ -37,7 +37,7 @@ qti-convert emulate-canvas your-package.qti.zip
 
 ### Failure
 
-```
+```text
 ❌ PREDICTION: Canvas import will likely FAIL
 
 🔴 Canvas Import Blockers:
@@ -71,3 +71,76 @@ This error means Canvas can't find the `correctResponse` element:
 
 !!! tip "R/Python Figures"
     Generate all figures with Quarto/RMarkdown *before* running the converter.
+
+---
+
+## Troubleshooting Guide
+
+### Error: "Failed to import content"
+
+**Cause:** Usually indicates a malformed manifest or missing resources.
+
+**Fix:**
+
+```bash
+# Verify package structure
+qti-convert verify your-package.qti.zip
+```
+
+Check that:
+
+- All referenced files exist in the package
+- `imsmanifest.xml` is valid XML
+- No special characters in filenames
+
+---
+
+### Error: "Unsupported question type"
+
+**Cause:** Canvas doesn't recognize the QTI interaction type.
+
+**Supported types:**
+
+| QTI Interaction | Canvas Type |
+|-----------------|-------------|
+| `choiceInteraction` | Multiple Choice |
+| `textEntryInteraction` | Fill in the Blank |
+| `extendedTextInteraction` | Essay |
+
+---
+
+### Math Equations Not Rendering
+
+**Cause:** LaTeX delimiters not converted.
+
+**Expected format for Canvas:**
+
+| Source | Canvas Format |
+|--------|---------------|
+| `$x^2$` | `\(x^2\)` |
+| `$$\sum_{i=1}^n$$` | `\[\sum_{i=1}^n\]` |
+
+The converter handles this automatically. If equations still don't render:
+
+1. Check Canvas has MathJax enabled
+2. Verify no conflicting HTML entities (`&lt;` vs `<`)
+
+---
+
+### Question Points Not Importing
+
+**Cause:** Points specified incorrectly in source.
+
+**Correct syntax:**
+
+```markdown
+## 1. [Essay, 10pts] Explain the concept.
+## 2. [5pts] Multiple choice question?
+```
+
+---
+
+### Need More Help?
+
+- [Open an issue](https://github.com/Data-Wise/canvas-qti-converter/issues) on GitHub
+- Check the [Canvas QTI documentation](https://community.canvaslms.com/t5/Canvas-Basics-Guide/What-is-QTI/ta-p/2)

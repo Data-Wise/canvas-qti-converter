@@ -4,7 +4,7 @@
 
 ```bash
 # Clone the repository
-git clone <repo-url>
+git clone https://github.com/Data-Wise/canvas-qti-converter.git
 cd canvas-qti-converter
 
 # Install dependencies

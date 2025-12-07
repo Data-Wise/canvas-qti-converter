@@ -1,35 +1,117 @@
 # Contributing
 
-We love your input! We want to make contributing to this project as easy and transparent as possible, whether it's:
+We love your input! We want to make contributing to this project as easy and transparent as possible.
 
-- Reporting a bug
-- Discussing the current state of the code
-- Submitting a fix
-- Proposing new features
+## Ways to Contribute
 
-## Development Process
+- 🐛 **Report bugs** — Found an issue? [Open a bug report](https://github.com/Data-Wise/canvas-qti-converter/issues/new)
+- 💡 **Suggest features** — Have an idea? [Start a discussion](https://github.com/Data-Wise/canvas-qti-converter/issues/new)
+- 🔧 **Submit fixes** — PRs are welcome for any bug fixes
+- 📚 **Improve docs** — Help us make the documentation better
 
-1. Clone the repo:
+## Development Setup
+
+### Prerequisites
+
+- Node.js 18+
+- npm or bun
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/Data-Wise/canvas-qti-converter.git
+cd canvas-qti-converter
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Link for local testing
+npm link
+```
+
+## Development Workflow
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run in watch mode (auto-rerun on changes)
+npm run test:watch
+```
+
+!!! tip "Test Coverage"
+    We use Vitest for testing. All 32 tests should pass before submitting a PR.
+
+### Code Quality
+
+```bash
+# Type checking
+npx tsc --noEmit
+
+# Build and verify
+npm run build
+```
+
+### Testing Your Changes
+
+```bash
+# Convert a test file
+qti-convert examples/sample-quiz.md -o test.qti.zip
+
+# Validate the output
+qti-convert verify test.qti.zip
+
+# Simulate Canvas import
+qti-convert emulate-canvas test.qti.zip
+```
+
+## Project Structure
+
+```text
+canvas-qti-converter/
+├── src/
+│   ├── cli.ts          # Command-line interface
+│   ├── parser.ts       # Markdown parsing logic
+│   ├── generator.ts    # QTI XML generation
+│   ├── validator.ts    # Package validation
+│   └── emulator.ts     # Canvas import simulation
+├── tests/              # Test suite
+├── docs/               # MkDocs documentation
+└── examples/           # Sample input files
+```
+
+## Pull Request Process
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Make** your changes with tests
+4. **Commit** using [conventional commits](https://www.conventionalcommits.org/)
 
    ```bash
-   git clone https://github.com/Data-Wise/canvas-qti-converter
-   cd canvas-qti-converter
+   git commit -m "feat: add amazing new feature"
+   git commit -m "fix: resolve parsing issue"
    ```
 
-2. Install dependencies:
+5. **Push** to your fork
+6. **Open** a Pull Request
 
-   ```bash
-   npm install
-   ```
+### PR Checklist
 
-3. Run tests:
+- [ ] Tests pass (`npm test`)
+- [ ] TypeScript compiles (`npx tsc --noEmit`)
+- [ ] Code follows existing style
+- [ ] Documentation updated if needed
 
-   ```bash
-   npm test
-   ```
+## Code of Conduct
 
-4. Create a branch, make changes, and push.
+Be kind. We're all here to learn and build something useful together.
 
-## Pull Requests
+## Questions?
 
-We use GitHub Actions to run tests and linters. Please ensure your PR passes all checks.
+Feel free to [open an issue](https://github.com/Data-Wise/canvas-qti-converter/issues) for any questions!

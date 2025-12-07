@@ -102,3 +102,45 @@ html {
   font-family: 'JetBrains Mono', monospace;
   margin: 1rem 0;
 }
+
+/* Grid cards styling (fallback for non-insider Material) */
+.grid.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.grid.cards > ul {
+  display: contents;
+}
+
+.grid.cards > ul > li,
+.grid.cards > div {
+  background: var(--md-code-bg-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  list-style: none;
+}
+
+.grid.cards > ul > li:hover,
+.grid.cards > div:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+}
+
+.grid.cards .twemoji {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Dark mode adjustments for grid cards */
+[data-md-color-scheme="slate"] .grid.cards > ul > li,
+[data-md-color-scheme="slate"] .grid.cards > div {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
