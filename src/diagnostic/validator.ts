@@ -75,11 +75,32 @@ export class QtiValidator {
         return report;
       }
 
-      // 1. Check imsmanifest.xml
+      // First, check for QTI 1.2 format (single XML file with <questestinterop>)
+      const xmlFiles = execSync(`find "${checkDir}" -maxdepth 1 -name "*.xml" -type f`, { encoding: 'utf-8' })
+        .trim()
+        .split('\n')
+        .filter(f => f.length > 0);
+      
+      // Check if any XML file is QTI 1.2 format
+      for (const xmlFile of xmlFiles) {
+        try {
+          const content = readFileSync(xmlFile, 'utf-8');
+          const json = this.parser.parse(content);
+          
+          if (json.questestinterop) {
+            // This is QTI 1.2 format - validate it
+            return this.validateQti12(json, xmlFile, report);
+          }
+        } catch (e) {
+          // Continue checking other files
+        }
+      }
+
+      // Check for imsmanifest.xml (QTI 2.1 format)
       const manifestPath = join(checkDir, 'imsmanifest.xml');
       if (!existsSync(manifestPath)) {
         report.isValid = false;
-        report.errors.push('imsmanifest.xml not found in root');
+        report.errors.push('imsmanifest.xml not found in root (QTI 2.1) and no valid QTI 1.2 XML file found');
         return report;
       }
       report.details.manifestFound = true;
@@ -337,6 +358,133 @@ export class QtiValidator {
     }
     
     if (report.errors.length > 0) report.isValid = false;
+    
+    return report;
+  }
+
+  /**
+   * Validate QTI 1.2 format (Canvas Classic Quizzes)
+   * Expects <questestinterop> root with <assessment> and <item> elements
+   */
+  private validateQti12(json: any, filePath: string, report: DiagnosticReport): DiagnosticReport {
+    const qti = json.questestinterop;
+    const assessment = qti.assessment;
+    
+    if (!assessment) {
+      report.errors.push('QTI 1.2: Missing <assessment> element');
+      report.isValid = false;
+      return report;
+    }
+    
+    // Mark as found (no manifest in QTI 1.2)
+    report.details.manifestFound = true;
+    report.details.testFound = true;
+    
+    // Get assessment title
+    const title = assessment['@_title'] || assessment['@_ident'] || 'Untitled';
+    
+    // Find items in sections
+    const section = assessment.section;
+    if (!section) {
+      report.errors.push('QTI 1.2: Missing <section> element');
+      report.isValid = false;
+      return report;
+    }
+    
+    // Handle single or multiple items
+    const items = section.item || [];
+    const itemList = Array.isArray(items) ? items : [items];
+    report.details.itemCount = itemList.length;
+    
+    if (itemList.length === 0) {
+      report.errors.push('QTI 1.2: No <item> elements found');
+      report.isValid = false;
+      return report;
+    }
+    
+    // Validate each item
+    for (let i = 0; i < itemList.length; i++) {
+      const item = itemList[i];
+      const itemIdent = item['@_ident'] || `item_${i + 1}`;
+      
+      // Check for presentation
+      if (!item.presentation) {
+        report.errors.push(`QTI 1.2: Item ${itemIdent} missing <presentation> element`);
+        continue;
+      }
+      
+      // Check for question text (mattext)
+      const material = item.presentation.material;
+      const mattext = material?.mattext;
+      const questionText = typeof mattext === 'string' ? mattext : mattext?.['#text'] || '';
+      
+      if (!questionText || questionText.trim().length < 3) {
+        report.errors.push(`Canvas import may fail: Question stem appears empty or too short for item ${itemIdent}`);
+      }
+      
+      // Check for answer options (response_lid with render_choice)
+      const responseLid = item.presentation.response_lid;
+      const responseStr = item.presentation.response_str;
+      
+      // Get question type from metadata
+      const metadata = item.itemmetadata?.qtimetadata?.qtimetadatafield;
+      let questionType = 'unknown';
+      if (metadata) {
+        const typeField = Array.isArray(metadata) 
+          ? metadata.find((f: any) => f.fieldlabel === 'question_type')
+          : (metadata.fieldlabel === 'question_type' ? metadata : null);
+        if (typeField) {
+          questionType = typeField.fieldentry || 'unknown';
+        }
+      }
+      
+      if (responseLid) {
+        // Multiple choice / True-False
+        const renderChoice = responseLid.render_choice;
+        if (renderChoice) {
+          const responseLabels = renderChoice.response_label || [];
+          const labels = Array.isArray(responseLabels) ? responseLabels : [responseLabels];
+          
+          if (labels.length < 2) {
+            report.errors.push(`Canvas import may fail: Less than 2 answer options for item ${itemIdent}`);
+          }
+        }
+        
+        // Check for correct answer in resprocessing
+        const resprocessing = item.resprocessing;
+        if (resprocessing) {
+          const respcondition = resprocessing.respcondition;
+          const condVar = respcondition?.conditionvar;
+          const varequal = condVar?.varequal;
+          
+          if (!varequal && questionType !== 'essay_question' && questionType !== 'short_answer_question') {
+            report.errors.push(`Canvas import may fail: No correct answer defined for item ${itemIdent}`);
+          }
+        } else if (questionType !== 'essay_question' && questionType !== 'short_answer_question') {
+          report.warnings.push(`Item ${itemIdent} missing <resprocessing> (may need manual grading)`);
+        }
+      } else if (responseStr) {
+        // Essay / Short Answer / Numeric - no options needed
+        // These are manually graded so no correct answer check
+      } else {
+        report.errors.push(`QTI 1.2: Item ${itemIdent} missing response element (response_lid or response_str)`);
+      }
+      
+      // Check for embedded images with data URIs (should work in Canvas)
+      const bodyContent = JSON.stringify(item.presentation);
+      if (bodyContent.includes('data:image')) {
+        // Good - embedded image
+      } else if (bodyContent.includes('<img') && bodyContent.includes('src=')) {
+        // Check if it's a relative path (may not work)
+        if (!bodyContent.includes('data:') && !bodyContent.includes('http')) {
+          report.warnings.push(`Item ${itemIdent} has image with relative path - may not display in Canvas`);
+        }
+      }
+    }
+    
+    if (report.errors.length > 0) {
+      report.isValid = false;
+    }
     
     return report;
   }
