@@ -49,8 +49,16 @@ if (!shouldRun) {
 
 try {
   // Use the qti-convert CLI from this package
-  const cliPath = join(dirname(import.meta.url.replace('file://', '')), '..', 'dist', 'index.js');
+  // The script is in _extensions/exam/qti-post-render.js
+  // The CLI is in dist/index.js
+  // So we need to go up two levels: ../../dist/index.js
+  const scriptDir = dirname(import.meta.url.replace('file://', ''));
+  const cliPath = join(scriptDir, '..', '..', 'dist', 'index.js');
   
+  if (!existsSync(cliPath)) {
+    throw new Error(`CLI not found at ${cliPath}`);
+  }
+
   execSync(`node "${cliPath}" "${inputFile}" -o "${outputFile}"`, {
     stdio: 'inherit',
     cwd: dir
