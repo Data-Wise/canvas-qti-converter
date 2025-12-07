@@ -456,8 +456,10 @@ export class QtiValidator {
           const respcondition = resprocessing.respcondition;
           const condVar = respcondition?.conditionvar;
           const varequal = condVar?.varequal;
+          const andBlock = condVar?.and;
+          const hasCorrect = varequal || (andBlock && (andBlock.varequal || (Array.isArray(andBlock) && andBlock.some((a: any) => a.varequal))));
           
-          if (!varequal && questionType !== 'essay_question' && questionType !== 'short_answer_question') {
+          if (!hasCorrect && questionType !== 'essay_question' && questionType !== 'short_answer_question') {
             report.errors.push(`Canvas import may fail: No correct answer defined for item ${itemIdent}`);
           }
         } else if (questionType !== 'essay_question' && questionType !== 'short_answer_question') {
