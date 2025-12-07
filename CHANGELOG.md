@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2025-12-07
+
+### Added
+
+- **Tutorials**: Added "Quarto Extension Deep Dive" and "Best Practices".
+- **Workflows**: Added automated GitHub Release generation and Dependabot.
+- **Documentation**: Complete overhaul of README and documentation site.
+
+### Changed
+
+- **Release**: Releases now include bundled extension artifacts (`examify-extension.zip`).
+
 ## [0.4.0] - 2025-12-07
 
 ### Added
