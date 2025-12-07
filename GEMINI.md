@@ -1,29 +1,41 @@
-# Canvas QTI Converter - Project Notes
+# Examify - Project Notes
 
 ## Project Overview
 
-- **Location**: `/Users/dt/dev-tools/canvas-examifyer`
-- **Purpose**: Convert Markdown questions to Canvas-compatible QTI 1.2 packages
-- **Documentation**: <https://data-wise.github.io/canvas-examifyer/>
-- **Version**: 0.3.0
+- **Location**: `/Users/dt/dev-tools/examify`
+- **Purpose**: Create exams from Markdown and export to Canvas QTI format
+- **Documentation**: <https://data-wise.github.io/examify/>
+- **Version**: 0.4.0
 
 ## Key Commands
 
 ```bash
 # Convert markdown to QTI (output to scratch folder)
-node dist/index.js input.md -o scratch/output.qti.zip
+examify input.md -o scratch/output.qti.zip
 
 # Verify QTI package
-node dist/index.js verify package.qti.zip
+examify verify package.qti.zip
 
 # Simulate Canvas import
-node dist/index.js emulate-canvas package.qti.zip
+examify emulate-canvas package.qti.zip
 
 # Preview parsed questions
-node dist/index.js input.md --preview
+examify input.md --preview
+
+# Lint input file
+examify check input.md
 
 # Run tests (32 tests)
 npm test
+```
+
+## Development Commands
+
+```bash
+npm install      # Install dependencies
+npm run build    # Build project
+npm test         # Run all tests
+npm link         # Install globally as 'examify'
 ```
 
 ## Development Rules
@@ -31,6 +43,7 @@ npm test
 - **Generated test files go in `scratch/`** - Keep root directory clean
 - **Build before testing**: `npm run build`
 - **QTI format**: Uses QTI 1.2 (Canvas Classic Quizzes), not QTI 2.1
+- **Images**: Bundled in package with `imsmanifest.xml`
 
 ## Input Format Requirements
 
@@ -48,14 +61,27 @@ Questions MUST use `## N. Question` format (with ##):
 3)  Five
 
 ## 2. [TF] The sky is blue. → True
+
+## 3. [Essay, 10pts] Explain your answer.
 ```
 
 ### Correct Answer Markers
 
 - `**Bold**` or `✓` checkmark
-- `[correct]` suffix
+- `[correct]` suffix (Quarto-friendly)
 - `*` prefix (e.g., `*a) Answer`)
 - `→ True` or `→ False` for T/F questions
+
+### Images
+
+```markdown
+## 1. What does this chart show?
+
+![Chart](assets/chart.png)
+
+*a) Linear growth
+b)  Exponential growth
+```
 
 ## Question Types
 
