@@ -144,7 +144,7 @@ b)  Exponential growth
 | `/build-test` | Build, test, generate QTI from markdown |
 | `/convert-quiz` | Convert markdown to QTI and verify |
 | `/deploy-docs` | Deploy docs to GitHub Pages |
-| `/release` | Create new version release with tag |
+| `/release` | `npm version patch` (Automated release) |
 
 ## Git Status
 

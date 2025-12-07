@@ -35,6 +35,37 @@ npm link
 
 ## Development Workflow
 
+### 📦 Release Workflow
+
+We use **automated versioning**. To release a new version:
+
+1. **Ensure you are on `dev` branch** and clean.
+2. Run the automated release command:
+
+    ```bash
+    npm version patch  # v0.4.1 -> v0.4.2
+    # OR
+    npm version minor  # v0.4.x -> v0.5.0
+    ```
+
+    **This command automatically:**
+    1. Bumps version in `package.json`, `src/index.ts`, `_extensions/.../_extension.yml`, and `README.md`.
+    2. Creates a git commit and tag.
+    3. Pushes to GitHub.
+    4. Triggers the GitHub Action to build and release artifacts.
+
+### Manual Release (Fallback)
+
+If automation fails, run:
+
+```bash
+bun scripts/sync-version.ts
+git add -A
+git commit -m "chore: bump version to vX.Y.Z"
+git tag vX.Y.Z
+git push origin dev --tags
+```
+
 ### Running Tests
 
 ```bash
