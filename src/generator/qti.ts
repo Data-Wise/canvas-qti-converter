@@ -15,16 +15,30 @@ export function generateCanvasId(seed: string): string {
 }
 
 /**
+ * Optional image resolver function type
+ * Takes an image path and returns a data URI or null if not resolvable
+ */
+export type ImageResolver = (imagePath: string) => string | null;
+
+/**
  * Escape XML special characters while converting LaTeX delimiters for Canvas
  * Canvas expects \(...\) for inline and \[...\] for display math
- * Also converts markdown images to HTML img tags
+ * Also converts markdown images to HTML img tags with optional base64 embedding
  */
-function escapeXmlPreserveLaTeX(text: string): string {
+function escapeXmlPreserveLaTeX(text: string, imageResolver?: ImageResolver): string {
   // First, extract and preserve markdown images as placeholders
   const images: string[] = [];
   let result = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
     const placeholder = `__IMG_PLACEHOLDER_${images.length}__`;
-    images.push(`<img src="${src}" alt="${alt}"/>`);
+    // If we have an image resolver, try to get a data URI
+    let imgSrc = src;
+    if (imageResolver) {
+      const resolved = imageResolver(src);
+      if (resolved) {
+        imgSrc = resolved;
+      }
+    }
+    images.push(`<img src="${imgSrc}" alt="${alt}"/>`);
     return placeholder;
   });
   
@@ -193,7 +207,7 @@ function generateItemMetadata(
 /**
  * Generate a single question item XML
  */
-function generateQuestionXml(question: Question): string {
+function generateQuestionXml(question: Question, imageResolver?: ImageResolver): string {
   const qType = getCanvasQuestionType(question.type);
   const questionSeed = `q_${question.id}_${question.stem.substring(0, 50)}`;
   const itemIdent = generateCanvasId(questionSeed);
@@ -206,7 +220,7 @@ function generateQuestionXml(question: Question): string {
   
   if (question.type === 'essay' || question.type === 'short_answer') {
     presentationContent = `<material>` +
-      `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(question.stem)}</mattext>` +
+      `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(question.stem, imageResolver)}</mattext>` +
       `</material>` +
       `<response_str ident="response1" rcardinality="Single">` +
       `<render_fib>` +
@@ -215,7 +229,7 @@ function generateQuestionXml(question: Question): string {
       `</response_str>`;
   } else {
     presentationContent = `<material>` +
-      `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(question.stem)}</mattext>` +
+      `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(question.stem, imageResolver)}</mattext>` +
       `</material>` +
       `<response_lid ident="response1" rcardinality="Single">` +
       `<render_choice>` +
@@ -236,12 +250,12 @@ function generateQuestionXml(question: Question): string {
  * Output is compact (single line) to match Canvas export format
  * Returns both the QTI XML and the assessment identifier for manifest linking
  */
-export function generateQTI(quiz: ParsedQuiz): { qti: string; assessmentIdent: string } {
+export function generateQTI(quiz: ParsedQuiz, imageResolver?: ImageResolver): { qti: string; assessmentIdent: string } {
   const assessmentIdent = generateCanvasId(`assessment_${quiz.title}`);
   
   // Generate all questions - include every question regardless of section assignment
   // Canvas puts all questions in a single root_section anyway
-  const allQuestionsXml = quiz.questions.map(q => generateQuestionXml(q)).join('');
+  const allQuestionsXml = quiz.questions.map(q => generateQuestionXml(q, imageResolver)).join('');
 
   // Build the complete QTI document (compact format like Canvas)
   const qti = `<?xml version="1.0" encoding="UTF-8"?>` +

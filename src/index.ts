@@ -3,9 +3,9 @@
 import { Command } from 'commander';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, mkdirSync, copyFileSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
-import { join, basename, dirname, resolve } from 'path';
+import { join, basename, dirname, resolve, extname } from 'path';
 import { parseMarkdown } from './parser/markdown.js';
-import { generateQTI } from './generator/qti.js';
+import { generateQTI, ImageResolver } from './generator/qti.js';
 import { QtiValidator } from './diagnostic/validator.js';
 import { lintMarkdown } from './diagnostic/linter.js';
 import { execSync } from 'child_process';
@@ -173,10 +173,44 @@ program
 
       // Create QTI 1.2 package (Canvas Classic Quizzes format)
       const tempDir = mkdtempSync(join(tmpdir(), 'qti12-'));
+      const inputDir = dirname(resolve(input));
+      
+      // Create image resolver that reads local files and converts to base64 data URIs
+      const imageResolver: ImageResolver = (imagePath: string) => {
+        try {
+          // Resolve path relative to input file
+          const fullPath = join(inputDir, imagePath);
+          if (!existsSync(fullPath)) {
+            console.warn(`Warning: Image not found: ${fullPath}`);
+            return null;
+          }
+          
+          // Read file and convert to base64
+          const imageData = readFileSync(fullPath);
+          const base64Data = imageData.toString('base64');
+          
+          // Determine MIME type from extension
+          const ext = extname(imagePath).toLowerCase();
+          const mimeTypes: Record<string, string> = {
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.webp': 'image/webp'
+          };
+          const mimeType = mimeTypes[ext] || 'application/octet-stream';
+          
+          return `data:${mimeType};base64,${base64Data}`;
+        } catch (error) {
+          console.warn(`Warning: Failed to read image ${imagePath}:`, error);
+          return null;
+        }
+      };
       
       try {
-        // Generate QTI 1.2 XML (single file format like Canvas exports)
-        const { qti, assessmentIdent } = generateQTI(parsed);
+        // Generate QTI 1.2 XML with embedded images
+        const { qti, assessmentIdent } = generateQTI(parsed, imageResolver);
         
         // Write the QTI XML file
         const qtiFilename = `${parsed.title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}.xml`;
