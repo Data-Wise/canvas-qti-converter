@@ -1,6 +1,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateItem, generateManifest21, generateTest } from '../src/generator/qti21';
+import { generateQTI } from '../src/generator/qti';
 import type { ParsedQuiz, Question } from '../src/parser/types';
 import { XMLParser } from 'fast-xml-parser';
 
@@ -57,5 +58,85 @@ describe('QTI Generator', () => {
       expect(obj.manifest).toBeDefined();
       expect(obj.manifest.resources.resource).toBeDefined();
     });
+  });
+});
+
+describe('QTI 1.2 Generator (Canvas)', () => {
+  it('should generate matching question XML', () => {
+    const quiz: ParsedQuiz = {
+      title: 'Test',
+      defaultPoints: 1,
+      sections: [],
+      questions: [{
+        id: 1,
+        type: 'matching',
+        stem: 'Match the terms',
+        points: 2,
+        options: [],
+        matchPairs: [
+          { left: 'Mean', right: 'Σx/n' },
+          { left: 'Variance', right: 'Σ(x-μ)²/n' }
+        ]
+      }]
+    };
+
+    const { qti } = generateQTI(quiz);
+
+    expect(qti).toContain('matching_question');
+    expect(qti).toContain('Mean');
+    expect(qti).toContain('Σx/n');
+    expect(qti).toContain('Variance');
+    expect(qti).toContain('response_lid'); // Matching uses response_lid
+  });
+
+  it('should generate fill-in-multiple-blanks question XML', () => {
+    const quiz: ParsedQuiz = {
+      title: 'Test',
+      defaultPoints: 1,
+      sections: [],
+      questions: [{
+        id: 1,
+        type: 'fill_in_multiple_blanks',
+        stem: 'r ranges from [blank1] to [blank2]',
+        points: 2,
+        options: [],
+        blanks: [
+          { blankId: 'blank1', answers: ['-1'] },
+          { blankId: 'blank2', answers: ['1', '+1'] }
+        ]
+      }]
+    };
+
+    const { qti } = generateQTI(quiz);
+
+    expect(qti).toContain('fill_in_multiple_blanks_question');
+    expect(qti).toContain('response_str'); // FMB uses response_str
+    expect(qti).toContain('-1');
+  });
+
+  it('should generate feedback XML when present', () => {
+    const quiz: ParsedQuiz = {
+      title: 'Test',
+      defaultPoints: 1,
+      sections: [],
+      questions: [{
+        id: 1,
+        type: 'multiple_choice',
+        stem: 'Test question',
+        points: 1,
+        options: [
+          { id: 'a', text: 'Wrong', isCorrect: false, feedback: 'Try again!' },
+          { id: 'b', text: 'Right', isCorrect: true, feedback: 'Correct!' }
+        ],
+        generalFeedback: 'Review chapter 5.'
+      }]
+    };
+
+    const { qti } = generateQTI(quiz);
+
+    expect(qti).toContain('itemfeedback');
+    expect(qti).toContain('Try again!');
+    expect(qti).toContain('Correct!');
+    expect(qti).toContain('Review chapter 5.');
   });
 });

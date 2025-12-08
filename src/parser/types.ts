@@ -18,6 +18,19 @@ export interface AnswerOption {
   id: string;          // a, b, c, d, etc.
   text: string;        // Answer text (may contain LaTeX)
   isCorrect: boolean;  // Whether this is the correct answer
+  feedback?: string;   // Optional feedback shown after answering
+}
+
+/** Matching question pair: left item matches to right item */
+export interface MatchPair {
+  left: string;        // Left side (prompt)
+  right: string;       // Right side (correct match)
+}
+
+/** Fill-in-multiple-blanks answer */
+export interface BlankAnswer {
+  blankId: string;     // e.g., "blank1", "blank2"
+  answers: string[];   // Acceptable answers for this blank
 }
 
 export interface Question {
@@ -29,6 +42,10 @@ export interface Question {
   section?: string;        // Section this question belongs to
   instructions?: string;   // Optional per-question instructions
   images?: string[];       // Paths to images referenced in the question
+  sourceLine?: number;     // Line number in source file (1-indexed)
+  matchPairs?: MatchPair[];     // For matching questions
+  blanks?: BlankAnswer[];       // For fill-in-multiple-blanks
+  generalFeedback?: string;     // Feedback shown after submission
 }
 
 export interface Section {

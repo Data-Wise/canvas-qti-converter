@@ -292,5 +292,384 @@ Answer: Paris
     expect(q.stem).not.toContain('Answer: Paris');
     expect(q.stem).toContain('The capital of France is...');
   });
+
+  // NEW: Test for sourceLine tracking
+  it('should track source line numbers for questions', () => {
+    const input = `# Quiz
+
+## 1. First Question [1 pt]
+1) A
+2) **B**
+
+## 2. Second Question [2 pts]
+1) X
+2) **Y**
+
+## 3. Third Question [1 pt]
+1) P
+2) **Q**
+`;
+    const result = parseMarkdown(input);
+
+    expect(result.questions).toHaveLength(3);
+    expect(result.questions[0].sourceLine).toBe(3);  // "## 1." is on line 3
+    expect(result.questions[1].sourceLine).toBe(7);  // "## 2." is on line 7
+    expect(result.questions[2].sourceLine).toBe(11); // "## 3." is on line 11
+  });
+
+  // NEW: Test for matching questions
+  it('should parse [Match] questions with :: pairs', () => {
+    const input = `# Quiz
+
+## 1. [Match] Match the statistic to its formula
+- Mean :: Σx/n
+- Variance :: Σ(x-μ)²/n
+- Standard Deviation :: √Variance
+`;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+
+    expect(q.type).toBe('matching');
+    expect(q.matchPairs).toHaveLength(3);
+    expect(q.matchPairs![0].left).toBe('Mean');
+    expect(q.matchPairs![0].right).toBe('Σx/n');
+    expect(q.matchPairs![1].left).toBe('Variance');
+    expect(q.matchPairs![2].left).toBe('Standard Deviation');
+  });
+
+  // NEW: Test for fill-in-multiple-blanks
+  it('should parse [FMB] questions with blanks', () => {
+    const input = `# Quiz
+
+## 2. [FMB] Complete the sentence
+The correlation coefficient r ranges from [blank1] to [blank2].
+
+[blank1]: -1
+[blank2]: 1, +1
+`;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+
+    expect(q.type).toBe('fill_in_multiple_blanks');
+    expect(q.blanks).toHaveLength(2);
+    expect(q.blanks![0].blankId).toBe('blank1');
+    expect(q.blanks![0].answers).toContain('-1');
+    expect(q.blanks![1].blankId).toBe('blank2');
+    expect(q.blanks![1].answers).toContain('1');
+    expect(q.blanks![1].answers).toContain('+1');
+  });
+
+  // NEW: Test for answer feedback
+  it('should parse feedback lines after options', () => {
+    const input = `# Quiz
+
+## 3. A p-value of 0.03 means:
+1) There's a 3% chance the null is true
+> Incorrect. P-value is P(data|H₀), not P(H₀|data).
+2) **If H₀ is true, there's 3% chance of this extreme result**
+> Correct! This is the definition of p-value.
+3) The effect size is 0.03
+> Incorrect. P-value ≠ effect size.
+
+> [feedback] Remember: p-value is about probability of data, not hypotheses.
+`;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+
+    expect(q.options[0].feedback).toBe('Incorrect. P-value is P(data|H₀), not P(H₀|data).');
+    expect(q.options[1].feedback).toBe('Correct! This is the definition of p-value.');
+    expect(q.options[2].feedback).toBe('Incorrect. P-value ≠ effect size.');
+    expect(q.generalFeedback).toBe('Remember: p-value is about probability of data, not hypotheses.');
+  });
+
+  // NEW: Test that feedback doesn't interfere with normal questions
+  it('should handle questions without feedback normally', () => {
+    const input = `# Quiz
+
+## 1. Simple question
+1) Wrong
+2) **Right**
+`;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+
+    expect(q.options[0].feedback).toBeUndefined();
+    expect(q.options[1].feedback).toBeUndefined();
+    expect(q.generalFeedback).toBeUndefined();
+  });
+
+  // NEW: Test for [x] correct answer marker
+  it('should recognize [x] suffix as correct answer marker', () => {
+    const input = `# Quiz
+
+## 1. What is variance?
+a) Sum of values
+b) Average squared deviation [x]
+c) Standard deviation
+`;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+
+    expect(q.options[1].isCorrect).toBe(true);
+    expect(q.options[1].text).toBe('Average squared deviation');
+    expect(q.options[1].text).not.toContain('[x]');
+    expect(q.options[0].isCorrect).toBe(false);
+    expect(q.options[2].isCorrect).toBe(false);
+  });
+
+  // NEW: Test for case-insensitive [X] marker
+  it('should handle [X] marker case-insensitively', () => {
+    const input = `# Quiz
+
+## 1. Question
+a) Wrong
+b) Right [X]
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].options[1].isCorrect).toBe(true);
+    expect(result.questions[0].options[1].text).toBe('Right');
+  });
+
+  // NEW: Test for // inline feedback
+  it('should parse // inline feedback comments', () => {
+    const input = `# Quiz
+
+## 1. What is the mean?
+a) Σx/n [x] // Correct! This is the definition.
+b) Σ(x-μ)²/n // This is variance, not mean.
+c) √Variance // This is standard deviation.
+`;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+
+    expect(q.options[0].isCorrect).toBe(true);
+    expect(q.options[0].text).toBe('Σx/n');
+    expect(q.options[0].feedback).toBe('Correct! This is the definition.');
+    expect(q.options[1].feedback).toBe('This is variance, not mean.');
+    expect(q.options[2].feedback).toBe('This is standard deviation.');
+  });
+
+  // NEW: Test for type marker aliases (case-insensitive)
+  it('should accept [TrueFalse] as alias for [TF]', () => {
+    const input = `# Quiz
+
+## 1. [TrueFalse] The sky is blue.
+a) True [x]
+b) False
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].type).toBe('true_false');
+    expect(result.questions[0].stem).toBe('The sky is blue.');
+  });
+
+  it('should accept [True/False] as alias for [TF]', () => {
+    const input = `# Quiz
+
+## 1. [True/False] Water is wet.
+a) True [x]
+b) False
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].type).toBe('true_false');
+  });
+
+  it('should accept [MultiAnswer] as alias for [MultiAns]', () => {
+    const input = `# Quiz
+
+## 1. [MultiAnswer] Select all that apply:
+a) Mean [x]
+b) Median [x]
+c) Range
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].type).toBe('multiple_answers');
+  });
+
+  it('should accept [SelectAll] as alias for multiple answers', () => {
+    const input = `# Quiz
+
+## 1. [SelectAll] Which are correct?
+a) A [x]
+b) B [x]
+c) C
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].type).toBe('multiple_answers');
+  });
+
+  it('should accept [SA] and [ShortAnswer] as aliases for [Short]', () => {
+    const input = `# Quiz
+
+## 1. [SA] What is the capital of France?
+Answer: Paris
+
+## 2. [ShortAnswer] What is 2+2?
+Answer: 4
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].type).toBe('short_answer');
+    expect(result.questions[1].type).toBe('short_answer');
+  });
+
+  it('should accept [Matching] as alias for [Match]', () => {
+    const input = `# Quiz
+
+## 1. [Matching] Match terms to definitions
+- Mean => Σx/n
+- Variance => Σ(x-μ)²/n
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].type).toBe('matching');
+    expect(result.questions[0].matchPairs).toHaveLength(2);
+  });
+
+  it('should accept [FillBlanks] and [FITB] as aliases for [FMB]', () => {
+    const input = `# Quiz
+
+## 1. [FillBlanks] Complete: r ranges from [blank1] to [blank2].
+[blank1]: -1
+[blank2]: 1
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].type).toBe('fill_in_multiple_blanks');
+  });
+
+  // NEW: Test for => matching separator
+  it('should parse matching pairs with => separator', () => {
+    const input = `# Quiz
+
+## 1. [Match] Match the terms
+- Mean => Σx/n
+- Variance => Σ(x-μ)²/n
+- SD => √Variance
+`;
+    const result = parseMarkdown(input);
+    const q = result.questions[0];
+
+    expect(q.matchPairs).toHaveLength(3);
+    expect(q.matchPairs![0].left).toBe('Mean');
+    expect(q.matchPairs![0].right).toBe('Σx/n');
+    expect(q.matchPairs![2].left).toBe('SD');
+  });
+
+  // NEW: Test that :: separator still works
+  it('should still support :: separator for matching', () => {
+    const input = `# Quiz
+
+## 1. [Match] Match terms
+- A :: 1
+- B :: 2
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].matchPairs).toHaveLength(2);
+    expect(result.questions[0].matchPairs![0].left).toBe('A');
+    expect(result.questions[0].matchPairs![0].right).toBe('1');
+  });
+
+  // NEW: Test case-insensitive type markers
+  it('should handle type markers case-insensitively', () => {
+    const input = `# Quiz
+
+## 1. [tf] lowercase marker
+a) True [x]
+b) False
+
+## 2. [ESSAY] uppercase marker
+Explain your answer.
+
+## 3. [Match] mixed case
+- A => 1
+`;
+    const result = parseMarkdown(input);
+    expect(result.questions[0].type).toBe('true_false');
+    expect(result.questions[1].type).toBe('essay');
+    expect(result.questions[2].type).toBe('matching');
+  });
+
+  // NEW: Clean syntax tests (no ## headers)
+  describe('Clean Syntax (no ## headers)', () => {
+    it('should parse questions with N. format and type marker', () => {
+      const input = `# Quiz
+
+1. [TF] The sky is blue. [2pts]
+a) True [x]
+b) False
+
+2. [MC] What is 2+2? [1pt]
+a) 3
+b) 4 [x]
+c) 5
+`;
+      const result = parseMarkdown(input);
+      expect(result.questions).toHaveLength(2);
+      expect(result.questions[0].type).toBe('true_false');
+      expect(result.questions[0].stem).toBe('The sky is blue.');
+      expect(result.questions[0].points).toBe(2);
+      expect(result.questions[1].type).toBe('multiple_choice');
+    });
+
+    it('should parse questions with N. format and points only', () => {
+      const input = `# Statistics Quiz
+
+1. What is variance? [3pts]
+a) Sum of squares
+b) Average squared deviation [x]
+c) Range
+`;
+      const result = parseMarkdown(input);
+      expect(result.questions).toHaveLength(1);
+      expect(result.questions[0].points).toBe(3);
+      expect(result.questions[0].stem).toBe('What is variance?');
+    });
+
+    it('should not treat numbered lists as questions on cover page', () => {
+      const input = `# Course Info
+
+This syllabus covers:
+1. Introduction to statistics
+2. Descriptive analysis
+3. Inferential methods
+
+# Section: Multiple Choice
+
+## 1. What is variance?
+a) Sum [x]
+b) Product
+`;
+      const result = parseMarkdown(input);
+      expect(result.questions).toHaveLength(1);
+      expect(result.questions[0].stem).toBe('What is variance?');
+    });
+
+    it('should parse matching with clean syntax', () => {
+      const input = `# Quiz
+
+1. [Match] Match statistics to formulas [4pts]
+- Mean => Σx/n
+- Variance => Σ(x-μ)²/n
+`;
+      const result = parseMarkdown(input);
+      expect(result.questions[0].type).toBe('matching');
+      expect(result.questions[0].matchPairs).toHaveLength(2);
+    });
+
+    it('should mix clean and traditional syntax', () => {
+      const input = `# Quiz
+
+## 1. Traditional header question
+a) A
+b) B [x]
+
+2. [TF] Clean syntax question [2pts]
+a) True [x]
+b) False
+`;
+      const result = parseMarkdown(input);
+      expect(result.questions).toHaveLength(2);
+      expect(result.questions[0].stem).toBe('Traditional header question');
+      expect(result.questions[1].stem).toBe('Clean syntax question');
+      expect(result.questions[1].points).toBe(2);
+    });
+  });
 });
 

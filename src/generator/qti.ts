@@ -3,8 +3,7 @@
  * Generates QTI 1.2 format compatible with Canvas LMS import
  */
 
-import type { ParsedQuiz, Question, AnswerOption } from '../parser/types.js';
-import { slugify } from '../parser/types.js';
+import type { ParsedQuiz, Question, AnswerOption, MatchPair, BlankAnswer } from '../parser/types.js';
 import { createHash } from 'crypto';
 
 /**
@@ -104,7 +103,7 @@ function generateOptionsWithIds(options: AnswerOption[], questionSeed: string): 
  * Generate answer options XML
  */
 function generateOptionsXml(generatedOptions: GeneratedOption[]): string {
-  return generatedOptions.map(({ ident, option }) => 
+  return generatedOptions.map(({ ident, option }) =>
     `<response_label ident="${ident}">` +
     `<material>` +
     `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(option.text)}</mattext>` +
@@ -114,13 +113,127 @@ function generateOptionsXml(generatedOptions: GeneratedOption[]): string {
 }
 
 /**
+ * Generate matching question presentation XML
+ * Canvas matching uses response_lid with render_choice for each left item
+ */
+function generateMatchingPresentation(stem: string, matchPairs: MatchPair[], questionSeed: string, imageResolver?: ImageResolver): {
+  xml: string;
+  matchData: { leftId: string; rightId: string; leftText: string; rightText: string }[];
+} {
+  const matchData: { leftId: string; rightId: string; leftText: string; rightText: string }[] = [];
+
+  // Generate unique IDs for right-side items (distractors)
+  const rightItems = matchPairs.map((pair, i) => ({
+    id: generateCanvasId(`${questionSeed}_right_${i}_${pair.right}`),
+    text: pair.right
+  }));
+
+  // Generate response elements for each left item
+  let responsesXml = '';
+  matchPairs.forEach((pair, i) => {
+    const leftId = generateCanvasId(`${questionSeed}_left_${i}_${pair.left}`);
+    const rightItem = rightItems[i];
+
+    matchData.push({
+      leftId,
+      rightId: rightItem.id,
+      leftText: pair.left,
+      rightText: pair.right
+    });
+
+    // Each left item has its own response_lid with all right items as choices
+    responsesXml += `<response_lid ident="${leftId}">` +
+      `<material><mattext texttype="text/html">${escapeXmlPreserveLaTeX(pair.left)}</mattext></material>` +
+      `<render_choice>` +
+      rightItems.map(r =>
+        `<response_label ident="${r.id}">` +
+        `<material><mattext texttype="text/html">${escapeXmlPreserveLaTeX(r.text)}</mattext></material>` +
+        `</response_label>`
+      ).join('') +
+      `</render_choice>` +
+      `</response_lid>`;
+  });
+
+  const xml = `<material>` +
+    `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(stem, imageResolver)}</mattext>` +
+    `</material>` +
+    responsesXml;
+
+  return { xml, matchData };
+}
+
+/**
+ * Generate fill-in-multiple-blanks presentation XML
+ */
+function generateFMBPresentation(stem: string, blanks: BlankAnswer[], questionSeed: string, imageResolver?: ImageResolver): {
+  xml: string;
+  blankData: { blankId: string; responseId: string; answers: string[] }[];
+} {
+  const blankData: { blankId: string; responseId: string; answers: string[] }[] = [];
+
+  // Generate response elements for each blank
+  let responsesXml = '';
+  blanks.forEach((blank, i) => {
+    const responseId = generateCanvasId(`${questionSeed}_${blank.blankId}`);
+    blankData.push({
+      blankId: blank.blankId,
+      responseId,
+      answers: blank.answers
+    });
+
+    responsesXml += `<response_str ident="${responseId}" rcardinality="Single">` +
+      `<render_fib><response_label ident="${blank.blankId}"/></render_fib>` +
+      `</response_str>`;
+  });
+
+  const xml = `<material>` +
+    `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(stem, imageResolver)}</mattext>` +
+    `</material>` +
+    responsesXml;
+
+  return { xml, blankData };
+}
+
+/**
+ * Generate feedback XML for options and general feedback
+ */
+function generateFeedbackXml(question: Question, generatedOptions: GeneratedOption[]): string {
+  let feedbackXml = '';
+
+  // Per-option feedback
+  generatedOptions.forEach(({ ident, option }) => {
+    if (option.feedback) {
+      feedbackXml += `<itemfeedback ident="${ident}_fb">` +
+        `<flow_mat><material>` +
+        `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(option.feedback)}</mattext>` +
+        `</material></flow_mat>` +
+        `</itemfeedback>`;
+    }
+  });
+
+  // General feedback
+  if (question.generalFeedback) {
+    feedbackXml += `<itemfeedback ident="general_fb">` +
+      `<flow_mat><material>` +
+      `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(question.generalFeedback)}</mattext>` +
+      `</material></flow_mat>` +
+      `</itemfeedback>`;
+  }
+
+  return feedbackXml;
+}
+
+/**
  * Generate response processing XML for correct answer
  * Canvas uses score of 100 for correct answers (percentage-based)
  */
-function generateResprocessing(question: Question, generatedOptions: GeneratedOption[]): string {
-  // Essay and Numerical (if manual) have no auto-grading or are handled differently
-  // Note: Numerical could be auto-graded but requires specific exact/range matches. 
-  // For now, only Short Answer is enabled for simple text match.
+function generateResprocessing(
+  question: Question,
+  generatedOptions: GeneratedOption[],
+  matchData?: { leftId: string; rightId: string }[],
+  blankData?: { blankId: string; responseId: string; answers: string[] }[]
+): string {
+  // Essay and Numerical (if manual) have no auto-grading
   if (question.type === 'essay' || question.type === 'numerical') {
     return `<resprocessing>` +
       `<outcomes>` +
@@ -129,12 +242,64 @@ function generateResprocessing(question: Question, generatedOptions: GeneratedOp
       `</resprocessing>`;
   }
 
-  // Short Answer / Fill in Blank: Check against TEXT value, not ID
+  // Matching questions: each left-right pair must match
+  if (question.type === 'matching' && matchData && matchData.length > 0) {
+    const varequals = matchData.map(m =>
+      `<varequal respident="${m.leftId}">${m.rightId}</varequal>`
+    ).join('');
+
+    return `<resprocessing>` +
+      `<outcomes>` +
+      `<decvar maxvalue="100" minvalue="0" varname="SCORE" vartype="Decimal"/>` +
+      `</outcomes>` +
+      `<respcondition continue="No">` +
+      `<conditionvar>` +
+      `<and>${varequals}</and>` +
+      `</conditionvar>` +
+      `<setvar actoin="Set" varname="SCORE">100</setvar>` +
+      `</respcondition>` +
+      `</resprocessing>`;
+  }
+
+  // Fill-in-multiple-blanks: check each blank
+  if (question.type === 'fill_in_multiple_blanks' && blankData && blankData.length > 0) {
+    const conditions = blankData.map(b => {
+      if (b.answers.length === 0) return '';
+      // Use OR for multiple acceptable answers per blank
+      if (b.answers.length === 1) {
+        return `<varequal respident="${b.responseId}">${escapeXmlPreserveLaTeX(b.answers[0])}</varequal>`;
+      }
+      const orConditions = b.answers.map(a =>
+        `<varequal respident="${b.responseId}">${escapeXmlPreserveLaTeX(a)}</varequal>`
+      ).join('');
+      return `<or>${orConditions}</or>`;
+    }).filter(c => c).join('');
+
+    if (!conditions) {
+      return `<resprocessing>` +
+        `<outcomes>` +
+        `<decvar maxvalue="100" minvalue="0" varname="SCORE" vartype="Decimal"/>` +
+        `</outcomes>` +
+        `</resprocessing>`;
+    }
+
+    return `<resprocessing>` +
+      `<outcomes>` +
+      `<decvar maxvalue="100" minvalue="0" varname="SCORE" vartype="Decimal"/>` +
+      `</outcomes>` +
+      `<respcondition continue="No">` +
+      `<conditionvar>` +
+      `<and>${conditions}</and>` +
+      `</conditionvar>` +
+      `<setvar actoin="Set" varname="SCORE">100</setvar>` +
+      `</respcondition>` +
+      `</resprocessing>`;
+  }
+
+  // Short Answer / Fill in Blank: Check against TEXT value
   if (question.type === 'short_answer' || question.type === 'fill_in_blank') {
-    // Find the correct option (extracted by parser)
     const correctOption = generatedOptions.find(go => go.option.isCorrect);
-    
-    // If no correct answer defined, fall back to manual grading (no respcondition)
+
     if (!correctOption) {
       return `<resprocessing>` +
         `<outcomes>` +
@@ -143,7 +308,6 @@ function generateResprocessing(question: Question, generatedOptions: GeneratedOp
         `</resprocessing>`;
     }
 
-    // Canvas Short Answer: exact match (varequal)
     return `<resprocessing>` +
       `<outcomes>` +
       `<decvar maxvalue="100" minvalue="0" varname="SCORE" vartype="Decimal"/>` +
@@ -162,10 +326,10 @@ function generateResprocessing(question: Question, generatedOptions: GeneratedOp
 
   // For multiple_answers questions, use "and" logic for all correct answers
   if (question.type === 'multiple_answers' && correctOptions.length > 1) {
-    const varequals = correctOptions.map(co => 
+    const varequals = correctOptions.map(co =>
       `<varequal respident="response1">${co.ident}</varequal>`
     ).join('');
-    
+
     return `<resprocessing>` +
       `<outcomes>` +
       `<decvar maxvalue="100" minvalue="0" varname="SCORE" vartype="Decimal"/>` +
@@ -181,8 +345,7 @@ function generateResprocessing(question: Question, generatedOptions: GeneratedOp
 
   // Single correct answer (standard multiple choice, true/false)
   const correctOption = correctOptions[0];
-  
-  // Canvas uses "actoin" (typo) - we match this for compatibility
+
   return `<resprocessing>` +
     `<outcomes>` +
     `<decvar maxvalue="100" minvalue="0" varname="SCORE" vartype="Decimal"/>` +
@@ -245,13 +408,26 @@ function generateQuestionXml(question: Question, imageResolver?: ImageResolver):
   const questionSeed = `q_${question.id}_${question.stem.substring(0, 50)}`;
   const itemIdent = generateCanvasId(questionSeed);
   const questionRef = generateCanvasId(`ref_${questionSeed}`);
-  
+
   // Generate options with Canvas-style identifiers
   const generatedOptions = generateOptionsWithIds(question.options, questionSeed);
-  
+
   let presentationContent: string;
-  
-  if (question.type === 'essay' || question.type === 'short_answer') {
+  let matchData: { leftId: string; rightId: string }[] | undefined;
+  let blankData: { blankId: string; responseId: string; answers: string[] }[] | undefined;
+
+  if (question.type === 'matching' && question.matchPairs) {
+    // Matching question
+    const result = generateMatchingPresentation(question.stem, question.matchPairs, questionSeed, imageResolver);
+    presentationContent = result.xml;
+    matchData = result.matchData;
+  } else if (question.type === 'fill_in_multiple_blanks' && question.blanks) {
+    // Fill-in-multiple-blanks question
+    const result = generateFMBPresentation(question.stem, question.blanks, questionSeed, imageResolver);
+    presentationContent = result.xml;
+    blankData = result.blankData;
+  } else if (question.type === 'essay' || question.type === 'short_answer') {
+    // Essay/Short answer
     presentationContent = `<material>` +
       `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(question.stem, imageResolver)}</mattext>` +
       `</material>` +
@@ -261,6 +437,7 @@ function generateQuestionXml(question: Question, imageResolver?: ImageResolver):
       `</render_fib>` +
       `</response_str>`;
   } else {
+    // Multiple choice, multiple answers, true/false
     presentationContent = `<material>` +
       `<mattext texttype="text/html">${escapeXmlPreserveLaTeX(question.stem, imageResolver)}</mattext>` +
       `</material>` +
@@ -270,11 +447,15 @@ function generateQuestionXml(question: Question, imageResolver?: ImageResolver):
       `</render_choice>` +
       `</response_lid>`;
   }
-  
+
+  // Generate feedback if present
+  const feedbackXml = generateFeedbackXml(question, generatedOptions);
+
   return `<item ident="${itemIdent}" title="Question">` +
     `${generateItemMetadata(question, qType, generatedOptions, questionRef)}` +
     `<presentation>${presentationContent}</presentation>` +
-    `${generateResprocessing(question, generatedOptions)}` +
+    `${generateResprocessing(question, generatedOptions, matchData, blankData)}` +
+    `${feedbackXml}` +
     `</item>`;
 }
 

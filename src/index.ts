@@ -1,14 +1,17 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { readFileSync, writeFileSync, mkdtempSync, rmSync, mkdirSync, copyFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync, mkdirSync, copyFileSync, existsSync, readdirSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, basename, dirname, resolve, extname } from 'path';
 import { parseMarkdown } from './parser/markdown.js';
 import { generateQTI, ImageResolver } from './generator/qti.js';
+import { generateText, TextExportOptions } from './generator/text.js';
 import { QtiValidator } from './diagnostic/validator.js';
 import { lintMarkdown } from './diagnostic/linter.js';
+import { loadConfig } from './config.js';
 import { execSync } from 'child_process';
+import { globSync } from 'glob';
 
 const program = new Command();
 
@@ -149,85 +152,123 @@ program
     }
   });
 
-// Default command (convert)
-program
-  .argument('[input]', 'Input file (markdown or text)')
-  .option('-o, --output <file>', 'Output QTI zip file')
-  .option('-v, --validate', 'Validate output structure')
-  .option('--preview', 'Preview parsed questions without generating file')
-  .action(async (input: string, options: { output?: string; validate?: boolean; preview?: boolean }) => {
-    if (!input) {
-      program.help();
-      return;
+// Type definitions for CLI options
+interface ConvertOptions {
+  output?: string;
+  validate?: boolean;
+  preview?: boolean;
+  points?: string;
+  title?: string;
+  format?: 'qti' | 'text';
+  answers?: boolean;
+}
+
+/**
+ * Convert a single file to the specified format
+ */
+async function convertFile(
+  input: string,
+  options: ConvertOptions,
+  config: ReturnType<typeof loadConfig>
+): Promise<void> {
+  const content = readFileSync(input, 'utf-8');
+  const parsed = parseMarkdown(content);
+
+  // Apply config/CLI overrides
+  const defaultPoints = options.points ? parseInt(options.points, 10) : config.defaultPoints;
+  if (defaultPoints && defaultPoints > 0) {
+    parsed.defaultPoints = defaultPoints;
+    parsed.questions.forEach(q => {
+      if (q.points === 1) {
+        q.points = defaultPoints;
+      }
+    });
+  }
+
+  // Override title if specified
+  const titleOverride = options.title || config.title;
+  if (titleOverride) {
+    parsed.title = titleOverride;
+  }
+
+  // Merge validate option (CLI overrides config)
+  const shouldValidate = options.validate ?? config.validate;
+
+  if (options.preview) {
+    console.log('Parsed Questions:');
+    console.log(JSON.stringify(parsed, null, 2));
+    return;
+  }
+
+  const format = options.format || 'qti';
+
+  // Plain text export
+  if (format === 'text') {
+    const textOptions: TextExportOptions = {
+      showAnswers: options.answers !== false,
+      showPoints: true,
+    };
+    const textOutput = generateText(parsed, textOptions);
+
+    let outputPath = options.output || input.replace(/\.(md|txt)$/, '.exam.txt');
+    if (!options.output && config.outputDir) {
+      const filename = basename(input).replace(/\.(md|txt)$/, '.exam.txt');
+      outputPath = join(config.outputDir, filename);
     }
-    // Main conversion logic
+
+    writeFileSync(outputPath, textOutput);
+    console.log(`✓ Generated Plain Text Exam: ${outputPath}`);
+    console.log(`  • ${parsed.questions.length} questions`);
+    console.log(`  • Answer key: ${options.answers !== false ? 'included' : 'excluded'}`);
+    return;
+  }
+
+  // QTI export (default)
+  const tempDir = mkdtempSync(join(tmpdir(), 'qti12-'));
+  const inputDir = dirname(resolve(input));
+  const imagesDir = join(tempDir, 'images');
+
+  const bundledImages: { path: string; filename: string }[] = [];
+
+  const imageResolver: ImageResolver = (imagePath: string) => {
     try {
-      const content = readFileSync(input, 'utf-8');
-      const parsed = parseMarkdown(content);
-      
-      if (options.preview) {
-        console.log('Parsed Questions:');
-        console.log(JSON.stringify(parsed, null, 2));
-        return;
+      const fullPath = join(inputDir, imagePath);
+      if (!existsSync(fullPath)) {
+        console.warn(`Warning: Image not found: ${fullPath}`);
+        return null;
       }
 
-      // Create QTI 1.2 package (Canvas Classic Quizzes format)
-      const tempDir = mkdtempSync(join(tmpdir(), 'qti12-'));
-      const inputDir = dirname(resolve(input));
-      const imagesDir = join(tempDir, 'images');
-      
-      // Track images that need to be bundled
-      const bundledImages: { path: string; filename: string }[] = [];
-      
-      // Create image resolver that copies files to package and returns relative paths
-      const imageResolver: ImageResolver = (imagePath: string) => {
-        try {
-          // Resolve path relative to input file
-          const fullPath = join(inputDir, imagePath);
-          if (!existsSync(fullPath)) {
-            console.warn(`Warning: Image not found: ${fullPath}`);
-            return null;
-          }
-          
-          // Create images directory if needed
-          if (!existsSync(imagesDir)) {
-            mkdirSync(imagesDir, { recursive: true });
-          }
-          
-          // Copy image to package
-          const imgFilename = basename(fullPath);
-          const destPath = join(imagesDir, imgFilename);
-          copyFileSync(fullPath, destPath);
-          
-          // Track for manifest
-          bundledImages.push({ path: `images/${imgFilename}`, filename: imgFilename });
-          
-          // Return relative path for QTI XML
-          return `images/${imgFilename}`;
-        } catch (error) {
-          console.warn(`Warning: Failed to process image ${imagePath}:`, error);
-          return null;
-        }
-      };
-      
-      try {
-        // Generate QTI 1.2 XML with bundled image references
-        const { qti, assessmentIdent } = generateQTI(parsed, imageResolver);
-        
-        // Write the QTI XML file
-        const qtiFilename = `${parsed.title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}.xml`;
-        writeFileSync(join(tempDir, qtiFilename), qti);
-        
-        // Generate imsmanifest.xml for Canvas to recognize images
-        const manifestId = `MANIFEST_${Date.now()}`;
-        const imageResources = bundledImages.map((img, i) => 
-          `    <resource identifier="IMG_${i}" type="webcontent" href="${img.path}">
+      if (!existsSync(imagesDir)) {
+        mkdirSync(imagesDir, { recursive: true });
+      }
+
+      const imgFilename = basename(fullPath);
+      const destPath = join(imagesDir, imgFilename);
+      copyFileSync(fullPath, destPath);
+
+      bundledImages.push({ path: `images/${imgFilename}`, filename: imgFilename });
+      return `images/${imgFilename}`;
+    } catch (error) {
+      console.warn(`Warning: Failed to process image ${imagePath}:`, error);
+      return null;
+    }
+  };
+
+  try {
+    const { qti, assessmentIdent } = generateQTI(parsed, imageResolver);
+
+    const qtiFilename = `${parsed.title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}.xml`;
+    writeFileSync(join(tempDir, qtiFilename), qti);
+
+    const manifestId = `MANIFEST_${Date.now()}`;
+    const imageResources = bundledImages.map((img, i) =>
+      `    <resource identifier="IMG_${i}" type="webcontent" href="${img.path}">
       <file href="${img.path}"/>
     </resource>`
-        ).join('\n');
-        
-        const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="${manifestId}" 
+    ).join('\n');
+
+    const manifest = `<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="${manifestId}"
           xmlns="http://www.imsglobal.org/xsd/imscp_v1p1">
   <metadata>
     <schema>IMS Content</schema>
@@ -241,27 +282,129 @@ program
 ${imageResources}
   </resources>
 </manifest>`;
-        
-        writeFileSync(join(tempDir, 'imsmanifest.xml'), manifest);
-        
-        // Create zip file
-        const outputZip = options.output || input.replace(/\.(md|txt)$/, '.qti.zip');
-        const absoluteOutputZip = resolve(outputZip);
-        
-        // Use zip command to create package
-        execSync(`cd "${tempDir}" && zip -r "${absoluteOutputZip}" .`, { stdio: 'pipe' });
-        
-        console.log(`✓ Generated QTI 1.2 Package: ${outputZip}`);
-        console.log(`  • ${parsed.questions.length} questions`);
-        console.log(`  • ${parsed.sections.length} sections`);
-        console.log(`  • ${bundledImages.length} images bundled`);
-        console.log(`  • Format: Canvas Classic Quizzes compatible`);
-        
-      } finally {
-        // Clean up temp directory
-        rmSync(tempDir, { recursive: true, force: true });
+
+    writeFileSync(join(tempDir, 'imsmanifest.xml'), manifest);
+
+    let outputZip = options.output || input.replace(/\.(md|txt)$/, '.qti.zip');
+    if (!options.output && config.outputDir) {
+      const filename = basename(input).replace(/\.(md|txt)$/, '.qti.zip');
+      outputZip = join(config.outputDir, filename);
+    }
+    const absoluteOutputZip = resolve(outputZip);
+
+    execSync(`cd "${tempDir}" && zip -r "${absoluteOutputZip}" .`, { stdio: 'pipe' });
+
+    console.log(`✓ Generated QTI 1.2 Package: ${outputZip}`);
+    console.log(`  • ${parsed.questions.length} questions`);
+    console.log(`  • ${parsed.sections.length} sections`);
+    console.log(`  • ${bundledImages.length} images bundled`);
+    console.log(`  • Format: Canvas Classic Quizzes compatible`);
+
+    if (shouldValidate) {
+      console.log('\nValidating output...');
+      const validator = new QtiValidator();
+      const report = await validator.validatePackage(absoluteOutputZip);
+      if (report.isValid) {
+        console.log('✓ Validation PASSED');
+      } else {
+        console.error('✗ Validation FAILED');
+        report.errors.forEach(e => console.error(`  - ${e}`));
       }
-      
+    }
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Expand glob patterns to file list
+ */
+function expandInputs(patterns: string[]): string[] {
+  const files: string[] = [];
+  for (const pattern of patterns) {
+    if (pattern.includes('*')) {
+      // Glob pattern
+      const matches = globSync(pattern, { nodir: true });
+      files.push(...matches.filter(f => /\.(md|txt)$/i.test(f)));
+    } else if (existsSync(pattern)) {
+      files.push(pattern);
+    } else {
+      console.warn(`Warning: File not found: ${pattern}`);
+    }
+  }
+  return [...new Set(files)]; // Deduplicate
+}
+
+// Default command (convert)
+program
+  .argument('[input...]', 'Input file(s) or glob pattern (e.g., *.md, exams/*.md)')
+  .option('-o, --output <file>', 'Output file (for single file) or directory (for batch)')
+  .option('-v, --validate', 'Validate output structure')
+  .option('--preview', 'Preview parsed questions without generating file')
+  .option('-p, --points <number>', 'Default points per question')
+  .option('-t, --title <title>', 'Quiz title override')
+  .option('-f, --format <type>', 'Output format: qti (default) or text', 'qti')
+  .option('--no-answers', 'Exclude answer key from text export')
+  .action(async (inputs: string[], options: ConvertOptions) => {
+    if (!inputs || inputs.length === 0) {
+      program.help();
+      return;
+    }
+
+    // Expand glob patterns
+    const files = expandInputs(inputs);
+
+    if (files.length === 0) {
+      console.error('Error: No matching files found');
+      process.exit(1);
+    }
+
+    // Batch mode: multiple files
+    if (files.length > 1) {
+      console.log(`Processing ${files.length} files...\n`);
+
+      // If output is specified, treat as directory for batch
+      let outputDir = options.output;
+      if (outputDir && !existsSync(outputDir)) {
+        mkdirSync(outputDir, { recursive: true });
+      }
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const file of files) {
+        try {
+          const config = loadConfig(resolve(file));
+
+          // For batch mode, override output to use directory
+          const batchOptions = { ...options };
+          if (outputDir) {
+            const ext = options.format === 'text' ? '.exam.txt' : '.qti.zip';
+            batchOptions.output = join(outputDir, basename(file).replace(/\.(md|txt)$/, ext));
+          } else {
+            delete batchOptions.output; // Use default naming
+          }
+
+          await convertFile(file, batchOptions, config);
+          successCount++;
+        } catch (error) {
+          console.error(`✗ Error processing ${file}: ${error instanceof Error ? error.message : error}`);
+          errorCount++;
+        }
+        console.log(''); // Blank line between files
+      }
+
+      console.log(`\nBatch complete: ${successCount} succeeded, ${errorCount} failed`);
+      if (errorCount > 0) process.exit(1);
+      return;
+    }
+
+    // Single file mode
+    const input = files[0];
+    const config = loadConfig(resolve(input));
+
+    try {
+      await convertFile(input, options, config);
     } catch (error) {
       console.error('Error:', error instanceof Error ? error.message : error);
       process.exit(1);
