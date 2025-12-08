@@ -5,9 +5,9 @@
 ![Examify Hero](https://capsule-render.vercel.app/api?type=waving&color=7C3AED&height=180&section=header&text=Examify&fontSize=80&animation=fadeIn&fontAlignY=38&desc=Write%20Exams%20in%20Markdown.%20Export%20to%20Canvas.&descAlignY=58&descSize=18&fontColor=ffffff)
 
 [![npm](https://img.shields.io/npm/v/examify?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/examify)
+[![CI](https://img.shields.io/github/actions/workflow/status/Data-Wise/examify/ci.yml?branch=main&style=for-the-badge&logo=github&label=CI)](https://github.com/Data-Wise/examify/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/github/actions/workflow/status/Data-Wise/examify/publish_docs.yml?branch=main&style=for-the-badge&logo=github-pages&label=Docs)](https://data-wise.github.io/examify/)
 [![License](https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-107%20passing-3178C6?style=for-the-badge)](https://github.com/Data-Wise/examify/actions)
-[![Docs](https://img.shields.io/badge/docs-online-6366f1?style=for-the-badge)](https://data-wise.github.io/examify/)
 
 **Create exams in Markdown → Import to Canvas in minutes**
 
