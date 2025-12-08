@@ -2,173 +2,241 @@
 
 <div align="center">
 
-![Examify Hero](https://capsule-render.vercel.app/api?type=waving&color=7C3AED&height=180&section=header&text=Examify&fontSize=80&animation=fadeIn&fontAlignY=38&desc=Write%20Exams%20in%20Markdown.%20Export%20to%20Canvas.&descAlignY=58&descSize=18&fontColor=ffffff)
+![Examify Hero](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,14,16,18,20&height=200&section=header&text=Examify&fontSize=80&animation=fadeIn&fontAlignY=35&desc=Markdown%20→%20Canvas%20Quizzes&descAlignY=55&descSize=22&fontColor=ffffff)
 
-[![npm](https://img.shields.io/npm/v/examify?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/examify)
-[![CI](https://img.shields.io/github/actions/workflow/status/Data-Wise/examify/ci.yml?branch=main&style=for-the-badge&logo=github&label=CI)](https://github.com/Data-Wise/examify/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/github/actions/workflow/status/Data-Wise/examify/publish_docs.yml?branch=main&style=for-the-badge&logo=github-pages&label=Docs)](https://data-wise.github.io/examify/)
-[![License](https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/examify?style=flat-square&logo=npm&color=CB3837)](https://www.npmjs.com/package/examify)
+[![CI](https://img.shields.io/github/actions/workflow/status/Data-Wise/examify/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/Data-Wise/examify/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/github/actions/workflow/status/Data-Wise/examify/publish_docs.yml?branch=main&style=flat-square&logo=readthedocs&logoColor=white&label=Docs)](https://data-wise.github.io/examify/)
+[![License](https://img.shields.io/badge/license-MIT-22C55E?style=flat-square)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
 
-**Create exams in Markdown → Import to Canvas in minutes**
+**Write exams in Markdown. Export to Canvas in seconds.**
 
-[📖 Documentation](https://data-wise.github.io/examify/) • [🚀 Getting Started](https://data-wise.github.io/examify/getting-started/) • [🐛 Report Issue](https://github.com/Data-Wise/examify/issues)
+[Documentation](https://data-wise.github.io/examify/) · [Getting Started](https://data-wise.github.io/examify/getting-started/) · [Report Bug](https://github.com/Data-Wise/examify/issues)
 
 </div>
 
 ---
 
-## What is Examify?
+## Why Examify?
 
-Examify converts your Markdown exam files into QTI packages that Canvas can import directly. No more clicking through Canvas forms question-by-question.
+Stop clicking through Canvas forms. **Write once, export anywhere.**
 
-**Perfect for:** Instructors, teaching assistants, and course developers who want to author exams in plain text.
+```
+┌─────────────────┐      ┌──────────┐      ┌─────────────────┐
+│   quiz.md       │ ───▶ │ examify  │ ───▶ │  quiz.qti.zip   │
+│   (Markdown)    │      │          │      │  (Canvas-ready) │
+└─────────────────┘      └──────────┘      └─────────────────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │   quiz.txt      │
+                    │   (Printable)   │
+                    └─────────────────┘
+```
+
+**Perfect for:** Instructors, TAs, and course developers who want version-controlled, portable exam files.
 
 ---
 
-## Installation
+## Quick Start
 
-### Try Without Installing
-
-Run Examify directly using npx (requires Node.js):
+**No installation needed** — try it now:
 
 ```bash
-npx examify myexam.md -o myexam.qti.zip
+npx examify quiz.md -o quiz.qti.zip
 ```
 
-### Mac
-
-**Using Homebrew (recommended):**
-
-```bash
-brew tap data-wise/tap
-brew install examify
-```
-
-**Using npm:**
-
-```bash
-npm install -g examify
-```
-
-### Windows
-
-**Step 1:** Install [Node.js](https://nodejs.org/) (version 18 or higher)
-
-**Step 2:** Open Command Prompt or PowerShell and run:
-
-```powershell
-npm install -g examify
-```
-
-**Step 3:** Verify installation:
-
-```powershell
-examify --version
-```
-
-### Linux
-
-```bash
-npm install -g examify
-```
-
-### Developer Setup
-
-For contributing or modifying the source:
-
-```bash
-git clone https://github.com/Data-Wise/examify.git
-cd examify
-npm install
-npm run build
-npm link
-```
-
----
-
-## Quick Example
-
-**Step 1:** Write your exam in Markdown
+### Write Your Exam
 
 ```markdown
-# Midterm Exam
+# Statistics Midterm
 
-1. [MC] The capital of France is [2pts]
-a) London
-b) Paris [x]
-c) Berlin
+1. [MC] What is the mean of 2, 4, 6? [2pts]
+a) Three
+b) Four [x]
+c) Five
 
-2. [TF] Water boils at 100°C at sea level. [1pt]
-a) True [x]
-b) False
+2. [TF] Variance can be negative. [1pt]
+a) True
+b) False [x]
 
-3. [Essay, 10pts] Explain photosynthesis.
+3. [Essay, 10pts] Explain the Central Limit Theorem.
 ```
 
-**Step 2:** Convert to QTI
+### Convert & Import
 
 ```bash
-examify midterm.md -o midterm.qti.zip
+examify midterm.md -o midterm.qti.zip    # For Canvas
+examify midterm.md -f text                # For printing
 ```
 
-**Step 3:** Import to Canvas
-
-Go to **Course Settings → Import Content → QTI .zip** and upload your file.
+Then: **Canvas → Settings → Import Content → QTI .zip**
 
 ---
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| **8 Question Types** | Multiple choice, true/false, multi-answer, short answer, essay, numeric, matching, fill-in-blanks |
-| **Clean Syntax** | Write `1. [MC] Question [2pts]` without `##` headers |
-| **LaTeX Math** | Write `$x^2$` or `$$\sum_{i=1}^n x_i$$` — converted automatically |
-| **Image Bundling** | Local images are packaged into the QTI zip automatically |
-| **Canvas Emulator** | Test your package *before* uploading with `examify emulate-canvas` |
-| **Text Export** | Export printable paper exams with `examify quiz.md -f text` |
-| **Batch Conversion** | Convert multiple files: `examify *.md -o output/` |
-| **Quarto Support** | Use R/Python to generate dynamic, randomized questions |
+<table>
+<tr>
+<td width="50%">
+
+### 📝 Clean Syntax
+Write questions naturally without complex markup.
+```markdown
+1. [MC] Question here [2pts]
+a) Wrong
+b) Right [x]
+```
+
+</td>
+<td width="50%">
+
+### 🧮 LaTeX Math
+Full equation support, auto-converted for Canvas.
+```markdown
+Find $\bar{x}$ given:
+$$\bar{x} = \frac{\sum x_i}{n}$$
+```
+
+</td>
+</tr>
+<tr>
+<td>
+
+### 📦 8 Question Types
+- Multiple Choice (`[MC]`)
+- True/False (`[TF]`)
+- Multiple Answer (`[MA]`)
+- Short Answer (`[Short]`)
+- Numeric (`[Numeric]`)
+- Essay (`[Essay]`)
+- Matching (`[Match]`)
+- Fill-in-Blanks (`[FMB]`)
+
+</td>
+<td>
+
+### 🔧 Powerful CLI
+```bash
+examify *.md -o output/     # Batch convert
+examify quiz.md -f text     # Paper exams
+examify emulate-canvas pkg  # Pre-validate
+examify check quiz.md       # Lint syntax
+```
+
+</td>
+</tr>
+<tr>
+<td>
+
+### 🖼️ Image Bundling
+Local images automatically packaged into QTI.
+```markdown
+![Graph](assets/chart.png)
+```
+
+</td>
+<td>
+
+### 🔬 Quarto Integration
+Dynamic questions with R/Python.
+```yaml
+format:
+  exam-gfm: default
+  exam-pdf: default
+```
+
+</td>
+</tr>
+</table>
+
+---
+
+## Installation
+
+<details>
+<summary><b>Mac (Homebrew)</b> — Recommended</summary>
+
+```bash
+brew tap data-wise/tap
+brew install examify
+```
+</details>
+
+<details>
+<summary><b>npm</b> — All platforms</summary>
+
+```bash
+npm install -g examify
+```
+Requires [Node.js 18+](https://nodejs.org/)
+</details>
+
+<details>
+<summary><b>Windows</b></summary>
+
+1. Install [Node.js](https://nodejs.org/) (v18+)
+2. Run: `npm install -g examify`
+3. Verify: `examify --version`
+</details>
+
+<details>
+<summary><b>From Source</b></summary>
+
+```bash
+git clone https://github.com/Data-Wise/examify.git
+cd examify && npm install && npm run build && npm link
+```
+</details>
 
 ---
 
 ## Commands
 
-```bash
-examify <file.md> -o <output.qti.zip>   # Convert markdown to QTI
-examify <file.md> -f text               # Export as printable text
-examify *.md -o output/                 # Batch convert multiple files
-examify emulate-canvas <file.qti.zip>   # Simulate Canvas import
-examify verify <file.qti.zip>           # Validate package structure
-examify check <file.md>                 # Lint markdown for errors
-examify <file.md> --preview             # Preview parsed questions
+| Command | Description |
+|---------|-------------|
+| `examify <file.md>` | Convert to QTI (default: `file.qti.zip`) |
+| `examify <file.md> -f text` | Export as printable plain text |
+| `examify *.md -o output/` | Batch convert multiple files |
+| `examify emulate-canvas <pkg>` | Simulate Canvas import |
+| `examify verify <pkg>` | Validate QTI package |
+| `examify check <file.md>` | Lint markdown for errors |
+| `examify --preview` | Preview parsed questions (JSON) |
+
+**Options:** `-o <output>` · `-p <points>` · `-t <title>` · `--no-answers` · `-v`
+
+---
+
+## Configuration
+
+Create `.examifyrc.json` for project defaults:
+
+```json
+{
+  "defaultPoints": 2,
+  "outputDir": "output",
+  "validate": true
+}
 ```
 
 ---
 
 ## Templates
 
-Get started quickly with a template:
-
 | Template | Description |
 |----------|-------------|
-| [starter-exam-md.md](examples/starter-exam-md.md) | Basic template — one of each question type |
-| [canvas-ready.md](examples/canvas-ready.md) | Comprehensive — 21 questions with math & code |
+| [starter-exam-md.md](examples/starter-exam-md.md) | Basic — one of each question type |
+| [canvas-ready.md](examples/canvas-ready.md) | Comprehensive — 21 questions |
 
 ---
 
 ## For Quarto Users
 
-If you use R or Python, try our Quarto extension for dynamic questions:
+Generate dynamic, randomized questions with R or Python:
 
 ```bash
 quarto add Data-Wise/examify
-```
-
-```yaml
-format:
-  exam-gfm: default   # For Canvas import
-  exam-pdf: default   # For paper exams
 ```
 
 📖 [Quarto Extension Guide →](https://data-wise.github.io/examify/extensions/quarto/)
@@ -177,19 +245,20 @@ format:
 
 ## Documentation
 
-| Topic | Link |
-|-------|------|
-| Getting Started | [Install and first exam](https://data-wise.github.io/examify/getting-started/) |
-| Input Formats | [Question syntax guide](https://data-wise.github.io/examify/formats/) |
-| Tutorials | [R/Quarto, VS Code tips](https://data-wise.github.io/examify/tutorials/) |
-| Troubleshooting | [Common issues](https://data-wise.github.io/examify/troubleshooting/) |
+| | |
+|---|---|
+| 📚 [**Full Docs**](https://data-wise.github.io/examify/) | Complete reference |
+| 🚀 [Getting Started](https://data-wise.github.io/examify/getting-started/) | Install + first quiz |
+| 📝 [Input Formats](https://data-wise.github.io/examify/formats/) | Question syntax |
+| ⚙️ [Configuration](https://data-wise.github.io/examify/config/) | Project settings |
+| 🎓 [Tutorials](https://data-wise.github.io/examify/tutorials/) | R/Quarto, VS Code |
 
 ---
 
 <div align="center">
 
-**[Full Documentation →](https://data-wise.github.io/examify/)**
+**[Get Started →](https://data-wise.github.io/examify/getting-started/)**
 
-<sub>MIT License • Built by [Data-Wise](https://github.com/Data-Wise)</sub>
+Made with ❤️ by [Data-Wise](https://github.com/Data-Wise) · [MIT License](LICENSE)
 
 </div>
