@@ -20,6 +20,15 @@ This downloads and runs Examify on-demand. Perfect for trying it out!
 
 ### Permanent Install
 
+=== "Mac (Homebrew)"
+
+    ```bash
+    brew tap data-wise/tap
+    brew install examify
+    ```
+    
+    Homebrew handles Node.js dependency automatically.
+
 === "npm (Mac/Linux/Windows)"
 
     ```bash
