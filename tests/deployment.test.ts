@@ -24,9 +24,9 @@ describe('Deployment Tests', () => {
       expect(content).toContain('main');
     });
 
-    it('should use GitHub Actions Pages deployment', () => {
+    it('should use mkdocs gh-deploy', () => {
       const content = readFileSync(join(workflowsDir, 'publish_docs.yml'), 'utf-8');
-      expect(content).toContain('actions/deploy-pages');
+      expect(content).toContain('mkdocs gh-deploy');
     });
 
     it('should use MkDocs for building docs', () => {
