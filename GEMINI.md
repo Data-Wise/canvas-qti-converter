@@ -6,7 +6,7 @@
 - **Purpose**: Create exams from Markdown and export to Canvas QTI format
 - **Documentation**: <https://data-wise.github.io/examify/>
 - **Version**: 0.4.2 (released 2025-12-08)
-- **Status**: ✅ Stable - All 132 tests passing
+- **Status**: ✅ Stable - All 142 tests passing
 - **Distribution**: npm (examify), Homebrew (data-wise/tap/examify)
 
 ## Quick Start
@@ -52,7 +52,7 @@ examify emulate-canvas package.qti.zip
 ```bash
 npm install      # Install dependencies
 npm run build    # Build project
-npm test         # Run all tests (132 tests)
+npm test         # Run all tests (142 tests)
 npm link         # Install globally as 'examify'
 ```
 
