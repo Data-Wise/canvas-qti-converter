@@ -1,6 +1,6 @@
 site_name: Examify
 site_description: Create exams from Markdown and export to Canvas QTI format.
-site_author: "MediationVerse Team"
+site_author: "Data-Wise"
 repo_name: examify
 repo_url: https://github.com/Data-Wise/examify
 edit_uri: edit/main/docs/
@@ -12,16 +12,12 @@ theme:
     - navigation.instant
     - navigation.instant.prefetch
     - navigation.tracking
-    - navigation.tabs
-    - navigation.tabs.sticky
     - navigation.sections
-    - navigation.expand
     - navigation.path
     - navigation.top
     - navigation.indexes
     - navigation.footer
     - toc.follow
-    - toc.integrate
     - content.code.copy
     - content.code.annotate
     - content.action.edit
@@ -36,15 +32,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: deep purple
-      accent: amber
+      primary: indigo
+      accent: purple
       toggle:
         icon: material/weather-sunny
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: deep purple
-      accent: amber
+      primary: indigo
+      accent: purple
       toggle:
         icon: material/weather-night
         name: Switch to light mode
@@ -63,9 +59,6 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/Data-Wise/examify
       name: GitHub Repository
-  analytics:
-    provider: google
-    property: G-XXXXXXXXXX
 
 extra_css:
   - stylesheets/extra.css
@@ -98,21 +91,14 @@ plugins:
 
 nav:
   - Home: index.md
-  - Getting Started:
-    - Quick Start: quickstart.md
-    - Usage: usage.md
-  - User Guide:
-    - Input Formats: formats.md
-    - Canvas Emulator: emulator.md
+  - Getting Started: getting-started.md
+  - Commands Reference: reference.md
+  - Input Formats: formats.md
+  - Canvas Emulator: emulator.md
   - Tutorials:
-    - R & Quarto: tutorials/quarto.md
-    - Quarto Examples: tutorials/quarto-examples.md
-    - VS Code Snippets: tutorials/vscode-snippets.md
-    - Extension Masterclass: tutorials/quarto-deep-dive.md
-    - Best Practices: tutorials/best-practices.md
-  - Extensions:
-    - Quarto Extension: extensions/quarto.md
-  - Development:
-    - Contributing: contributing.md
-    - Extension Internals: development/extension.md
-    - API Reference: reference.md
+      - Overview: tutorials/index.md
+      - R & Quarto: tutorials/quarto.md
+      - VS Code Snippets: tutorials/vscode-snippets.md
+  - Quarto Extension: extensions/quarto.md
+  - Troubleshooting: troubleshooting.md
+  - Contributing: contributing.md

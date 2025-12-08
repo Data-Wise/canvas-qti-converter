@@ -1,49 +1,83 @@
-# CLI Reference
+# Commands Reference
 
-Complete command reference for **Examify**.
+Complete command reference for Examify CLI.
 
-## Commands
+---
 
-### Convert (Default)
+## Quick Reference
 
-Convert a Markdown file to QTI package.
+| Command | Purpose |
+|---------|---------|
+| `examify <file> -o <out.zip>` | Convert Markdown to QTI |
+| `examify verify <pkg>` | Validate package structure |
+| `examify emulate-canvas <pkg>` | Simulate Canvas import |
+| `examify check <file>` | Lint input file |
+| `examify <file> --preview` | Preview parsed questions |
+
+---
+
+## examify (convert)
+
+**Usage:**
 
 ```bash
 examify <input> [options]
 ```
 
+**What it does:**
+
+- Parses your Markdown file for questions
+- Generates QTI 1.2 XML for Canvas Classic Quizzes
+- Bundles images with `imsmanifest.xml`
+- Creates a `.qti.zip` package
+
+**When to use:**
+
+Converting your Markdown quiz files for Canvas import.
+
 **Options:**
 
 | Option | Description |
 |--------|-------------|
-| `-o, --output <file>` | Output QTI zip file path |
-| `-v, --validate` | Validate output structure |
-| `--preview` | Preview parsed questions (no file created) |
+| `-o, --output <file>` | Output path (default: `<input>.qti.zip`) |
+| `-v, --validate` | Validate output after generating |
+| `--preview` | Preview parsed questions, no file created |
 
-**Examples:**
+**Example:**
 
 ```bash
 # Basic conversion
 examify quiz.md
 
 # Custom output path
-examify quiz.md -o my-quiz.qti.zip
+examify quiz.md -o output/my-quiz.qti.zip
 
-# Preview without generating file
+# Preview without generating
 examify quiz.md --preview
 ```
 
 ---
 
-### Verify
+## verify
 
-Validate an existing QTI package structure.
+**Usage:**
 
 ```bash
 examify verify <path>
 ```
 
-**Examples:**
+**What it does:**
+
+- Validates manifest structure
+- Checks all referenced resources exist
+- Validates XML syntax
+- Reports missing or malformed files
+
+**When to use:**
+
+Checking an existing QTI package before Canvas import.
+
+**Example:**
 
 ```bash
 examify verify quiz.qti.zip
@@ -52,12 +86,29 @@ examify verify ./qti-folder/
 
 ---
 
-### Emulate Canvas
+## emulate-canvas
 
-Simulate Canvas LMS import and predict success/failure.
+**Usage:**
 
 ```bash
 examify emulate-canvas <path>
+```
+
+**What it does:**
+
+- Simulates Canvas LMS import process
+- Validates QTI 1.2 compatibility
+- Checks for duplicate IDs
+- Predicts import success or failure
+
+**When to use:**
+
+Before uploading to Canvas, especially for complex quizzes.
+
+**Example:**
+
+```bash
+examify emulate-canvas quiz.qti.zip
 ```
 
 **Output includes:**
@@ -69,9 +120,9 @@ examify emulate-canvas <path>
 
 ---
 
-### Check (Lint)
+## check (lint)
 
-Lint a Markdown file for syntax errors.
+**Usage:**
 
 ```bash
 examify check <input>
@@ -79,11 +130,24 @@ examify check <input>
 examify lint <input>
 ```
 
-**Examples:**
+**What it does:**
+
+- Validates Markdown syntax
+- Checks question formatting
+- Reports missing answer markers
+- Identifies structural issues
+
+**When to use:**
+
+Before conversion to catch input errors early.
+
+**Example:**
 
 ```bash
 examify check quiz.md
 ```
+
+---
 
 ## Exit Codes
 

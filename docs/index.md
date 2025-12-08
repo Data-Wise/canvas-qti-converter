@@ -1,22 +1,11 @@
 # Examify
 
-<div class="hero-section" markdown>
+**Create exams from Markdown and export to Canvas QTI format.**
 
-<div class="hero-badges" markdown>
-[![Version](https://img.shields.io/badge/version-0.4.0-7C3AED?style=for-the-badge)](https://github.com/Data-Wise/examify/releases)
+[![Version](https://img.shields.io/badge/version-0.4.0-6366f1?style=for-the-badge)](https://github.com/Data-Wise/examify/releases)
 [![License](https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge)](https://github.com/Data-Wise/examify/blob/main/LICENSE)
 [![Node](https://img.shields.io/badge/node-≥18-3178C6?style=for-the-badge)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/tests-32_passing-22C55E?style=for-the-badge)](https://github.com/Data-Wise/examify/actions)
-</div>
-
-<div class="hero-tagline" markdown>
-## 🚀 Create Beautiful Exams from Markdown
-
-**Transform your plain text questions into Canvas-ready quiz packages in seconds.**  
-No XML. No hassle. Just Markdown.
-</div>
-
-</div>
+[![Tests](https://img.shields.io/badge/tests-35_passing-22C55E?style=for-the-badge)](https://github.com/Data-Wise/examify/actions)
 
 ---
 
@@ -24,41 +13,41 @@ No XML. No hassle. Just Markdown.
 
 <div class="grid cards" markdown>
 
-- :material-file-document-edit:{ .lg .middle .feature-icon } **Markdown First**
+- :material-file-document-edit:{ .lg .middle } **Markdown First**
 
     ---
 
     Write questions in simple, readable Markdown. Focus on content, not formatting.
 
-- :material-math-integral:{ .lg .middle .feature-icon } **LaTeX Math**
+- :material-math-integral:{ .lg .middle } **LaTeX Math**
 
     ---
 
     Full equation support with `$...$` inline and `$$...$$` display math.
 
-- :material-image-multiple:{ .lg .middle .feature-icon } **Image Bundling**
+- :material-image-multiple:{ .lg .middle } **Image Bundling**
 
     ---
 
     Automatically packages images into Canvas-ready QTI with proper manifests.
 
-- :material-shield-check:{ .lg .middle .feature-icon } **Canvas Emulator**
+- :material-shield-check:{ .lg .middle } **Canvas Emulator**
 
     ---
 
     Predict import success *before* uploading. Catch errors early.
 
-- :material-format-list-checks:{ .lg .middle .feature-icon } **6 Question Types**
+- :material-format-list-checks:{ .lg .middle } **6 Question Types**
 
     ---
 
     Multiple choice, true/false, multiple answer, essay, short answer, and numeric.
 
-- :material-flash:{ .lg .middle .feature-icon } **Fast & Reliable**
+- :material-flash:{ .lg .middle } **Fast & Reliable**
 
     ---
 
-    Built with TypeScript. Comprehensive test suite with 32 tests passing.
+    Built with TypeScript. Comprehensive test suite with 35 tests passing.
 
 </div>
 
@@ -73,7 +62,7 @@ cd examify
 npm install && npm run build && npm link
 
 # Convert your first quiz
-examify quiz.md -o scratch/quiz.qti.zip
+examify quiz.md -o quiz.qti.zip
 ```
 
 ---
@@ -83,7 +72,7 @@ examify quiz.md -o scratch/quiz.qti.zip
 === "Input (Markdown)"
 
     ```markdown
-    # Pool: Statistics Quiz
+    # Statistics Quiz
 
     # Section: Multiple Choice
 
@@ -101,7 +90,7 @@ examify quiz.md -o scratch/quiz.qti.zip
 === "Output"
 
     ```text
-    ✓ Generated QTI Package: scratch/quiz.qti.zip
+    ✓ Generated QTI Package: quiz.qti.zip
       • 3 questions (MC, TF, Essay)
       • 1 section
       • 0 images bundled
@@ -123,19 +112,26 @@ examify quiz.md -o scratch/quiz.qti.zip
 
 ---
 
-## 🆕 What's New in v0.4.0
+## 📚 Documentation
 
-!!! success "Latest Release"
-    - **📦 Image Bundling** — Images properly packaged with `imsmanifest.xml`
-    - **🎨 Project Rename** — Now called **Examify**!
-    - **🔍 Enhanced Emulator** — Validates QTI 1.2 packages
-    - **✅ Canvas Tested** — Verified imports into Canvas LMS
+- [Getting Started](getting-started.md) — Installation and first quiz
+- [Commands Reference](reference.md) — All CLI options
+- [Input Formats](formats.md) — Question syntax guide
+- [Troubleshooting](troubleshooting.md) — Common issues and fixes
 
 ---
 
-<div class="cta-buttons" markdown>
+## 🤝 Contributing
 
-[Get Started :material-arrow-right:](quickstart.md){ .md-button .md-button--primary .md-button--lg }
-[View on GitHub :material-github:](https://github.com/Data-Wise/examify){ .md-button .md-button--lg }
+See the [Contributing Guide](contributing.md) for development setup and guidelines.
 
-</div>
+---
+
+## 📄 License
+
+MIT © [Data-Wise](https://github.com/Data-Wise)
+
+---
+
+[Get Started :material-arrow-right:](getting-started.md){ .md-button .md-button--primary }
+[View on GitHub :material-github:](https://github.com/Data-Wise/examify){ .md-button }

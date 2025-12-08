@@ -1,11 +1,12 @@
-# Supported Formats
+# Input Formats
 
-**Examify** accepts a simple Markdown-based format.
+Examify accepts a simple Markdown-based format for quiz questions.
+
+---
 
 ## Structure
 
-!!! warning "Required Format"
-    Questions **must** use `## N. Question` format (with the `##` prefix).
+Questions **must** use `## N. Question` format (with the `##` prefix).
 
 ```markdown
 # Quiz Title
@@ -48,15 +49,14 @@ Mark the correct answer with one of the supported markers.
 3)  Five
 ```
 
-!!! tip "Correct Answer Markers"
-    Choose one of these markers for correct answers:
+**Correct Answer Markers:**
 
-    | Marker | Example | Best For |
-    |--------|---------|----------|
-    | `**Bold**` | `2)  **Answer**` | Visual emphasis |
-    | `✓` checkmark | `2)  Answer ✓` | Quick marking |
-    | `[correct]` | `2)  Answer [correct]` | Quarto compatibility |
-    | `*` prefix | `*2)  Answer` | Traditional format |
+| Marker | Example | Best For |
+|--------|---------|----------|
+| `**Bold**` | `2)  **Answer**` | Visual emphasis |
+| `✓` checkmark | `2)  Answer ✓` | Quick marking |
+| `[correct]` | `2)  Answer [correct]` | Quarto compatibility |
+| `*` prefix | `*2)  Answer` | Traditional format |
 
 ---
 
@@ -79,8 +79,7 @@ Or use arrow syntax for single-line format:
 ## 4. Water freezes at 50°C. → False
 ```
 
-!!! tip "Arrow Syntax"
-    Use `→ True` or `-> True` in the question header to auto-mark the answer.
+**Arrow formats:** Use `→ True` or `-> True` in the question header.
 
 ---
 
@@ -177,8 +176,6 @@ Reference local images using standard Markdown syntax. Images are automatically 
 ```markdown
 ## 1. What does this graph show?
 
-The graph below represents population growth over time. Observe the trend line carefully.
-
 ![Graph](assets/graph.png)
 
 *a) Linear growth
@@ -192,13 +189,13 @@ b)  Exponential growth
 | PNG | `.png` | Recommended for charts |
 | JPEG | `.jpg`, `.jpeg` | Good for photos |
 | GIF | `.gif` | Animated supported |
-| SVG | `.svg` | Vector graphics (Canvas supported) |
-| WebP | `.webp` | Modern format (Canvas supported) |
+| SVG | `.svg` | Vector graphics |
+| WebP | `.webp` | Modern format |
 
 ### Path Requirements
 
 - Use **relative paths** from your Markdown file
-- Images should be in a subfolder (e.g., `assets/`, `images/`, `figures/`)
+- Images should be in a subfolder (e.g., `assets/`, `images/`)
 - Paths are case-sensitive
 
 ```
@@ -209,13 +206,7 @@ quiz/
     └── diagram.svg
 ```
 
-!!! success "How It Works"
-    Examify:
-
-    1. Finds all `![alt](path)` references in your questions
-    2. Copies the image files to an `images/` folder in the package
-    3. Generates `imsmanifest.xml` listing all resources
-    4. Creates `<img>` tags with relative paths in the QTI XML
+**How it works:** Examify finds all `![alt](path)` references, copies images to the package, generates `imsmanifest.xml`, and creates `<img>` tags in the QTI XML.
 
 ---
 
@@ -229,5 +220,4 @@ Examify automatically ignores solution/proof blocks.
 </div>
 ```
 
-!!! info "Quarto Compatibility"
-    When using Quarto, wrap solutions in `<div class="solution">` or `<div class="proof">` to prevent them from appearing in the exported quiz.
+**Quarto users:** Wrap solutions in `<div class="solution">` or `<div class="proof">` to exclude them from exports.
