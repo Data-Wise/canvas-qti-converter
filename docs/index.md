@@ -2,10 +2,10 @@
 
 **Create exams from Markdown and export to Canvas QTI format.**
 
-[![Version](https://img.shields.io/badge/version-0.4.0-6366f1?style=for-the-badge)](https://github.com/Data-Wise/examify/releases)
+[![Version](https://img.shields.io/badge/version-0.4.2-6366f1?style=for-the-badge)](https://github.com/Data-Wise/examify/releases)
 [![License](https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge)](https://github.com/Data-Wise/examify/blob/main/LICENSE)
 [![Node](https://img.shields.io/badge/node-≥18-3178C6?style=for-the-badge)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/tests-35_passing-22C55E?style=for-the-badge)](https://github.com/Data-Wise/examify/actions)
+[![Tests](https://img.shields.io/badge/tests-48_passing-22C55E?style=for-the-badge)](https://github.com/Data-Wise/examify/actions)
 
 ---
 
@@ -43,11 +43,11 @@
 
     Multiple choice, true/false, multiple answer, essay, short answer, and numeric.
 
-- :material-flash:{ .lg .middle } **Fast & Reliable**
+- :material-language-python:{ .lg .middle } **Quarto Integration**
 
     ---
 
-    Built with TypeScript. Comprehensive test suite with 35 tests passing.
+    Use with R/Python for dynamic, randomized exam generation.
 
 </div>
 
@@ -63,7 +63,13 @@ npm install && npm run build && npm link
 
 # Convert your first quiz
 examify quiz.md -o quiz.qti.zip
+
+# Verify before upload
+examify emulate-canvas quiz.qti.zip
 ```
+
+[Get Started :material-arrow-right:](getting-started.md){ .md-button .md-button--primary }
+[View on GitHub :material-github:](https://github.com/Data-Wise/examify){ .md-button }
 
 ---
 
@@ -78,9 +84,9 @@ examify quiz.md -o quiz.qti.zip
 
     ## 1. What is the mean of 2, 4, 6? [2 pts]
 
-    1)  Three
-    2)  **Four** ✓
-    3)  Five
+    a) Three
+    b) **Four** ✓
+    c) Five
     
     ## 2. [TF] Variance can be negative. → False
 
@@ -100,7 +106,36 @@ examify quiz.md -o quiz.qti.zip
 
 ---
 
-## 🎯 Commands
+## 🎯 Workflow
+
+```mermaid
+graph LR
+    A[quiz.md] --> B[examify]
+    B --> C[quiz.qti.zip]
+    C --> D[Canvas Import]
+    B --> E[emulate-canvas]
+    E -->|✅ Success| D
+    E -->|❌ Errors| F[Fix Issues]
+    F --> A
+```
+
+---
+
+## 📚 Templates
+
+Start with a ready-made template:
+
+| Template | Questions | Best For |
+|----------|-----------|----------|
+| [`starter-exam-md.md`](https://github.com/Data-Wise/examify/blob/main/examples/starter-exam-md.md) | 7 | Beginners |
+| [`canvas-ready.md`](https://github.com/Data-Wise/examify/blob/main/examples/canvas-ready.md) | 21 | Full feature coverage |
+| [`canvas-validation.md`](https://github.com/Data-Wise/examify/blob/main/examples/canvas-validation.md) | 9 | Testing all features |
+
+**Quarto Users:** Check out the [Quarto Extension](extensions/quarto.md) for `.qmd` templates with R/Python code.
+
+---
+
+## 🔧 Commands
 
 | Command | Description |
 |---------|-------------|
@@ -110,14 +145,31 @@ examify quiz.md -o quiz.qti.zip
 | `examify check file.md` | Lint input file for errors |
 | `examify file.md --preview` | Preview parsed questions |
 
+See [Commands Reference](reference.md) for all options.
+
 ---
 
-## 📚 Documentation
+## 📖 Documentation
 
-- [Getting Started](getting-started.md) — Installation and first quiz
-- [Commands Reference](reference.md) — All CLI options
-- [Input Formats](formats.md) — Question syntax guide
-- [Troubleshooting](troubleshooting.md) — Common issues and fixes
+<div class="grid cards" markdown>
+
+- :material-rocket-launch:{ .lg .middle } **[Getting Started](getting-started.md)**
+
+    Installation and your first quiz in 5 minutes.
+
+- :material-format-list-bulleted:{ .lg .middle } **[Input Formats](formats.md)**
+
+    Complete question syntax reference.
+
+- :material-test-tube:{ .lg .middle } **[Canvas Emulator](emulator.md)**
+
+    Pre-validate before uploading.
+
+- :material-school:{ .lg .middle } **[Tutorials](tutorials/index.md)**
+
+    R/Quarto integration and more.
+
+</div>
 
 ---
 
@@ -130,8 +182,3 @@ See the [Contributing Guide](contributing.md) for development setup and guidelin
 ## 📄 License
 
 MIT © [Data-Wise](https://github.com/Data-Wise)
-
----
-
-[Get Started :material-arrow-right:](getting-started.md){ .md-button .md-button--primary }
-[View on GitHub :material-github:](https://github.com/Data-Wise/examify){ .md-button }

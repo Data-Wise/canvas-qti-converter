@@ -9,19 +9,25 @@ site_url: https://data-wise.github.io/examify/
 theme:
   name: material
   features:
+    # Navigation
     - navigation.instant
     - navigation.instant.prefetch
     - navigation.tracking
+    - navigation.tabs           # Header tabs
+    - navigation.tabs.sticky    # Sticky header tabs
     - navigation.sections
     - navigation.path
     - navigation.top
     - navigation.indexes
     - navigation.footer
+    # Table of contents
     - toc.follow
+    # Content features
     - content.code.copy
     - content.code.annotate
     - content.action.edit
     - content.tabs.link
+    # Search
     - search.suggest
     - search.highlight
     - search.share
@@ -66,7 +72,11 @@ extra_css:
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -92,14 +102,15 @@ plugins:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
-  - Commands Reference: reference.md
-  - Input Formats: formats.md
-  - Canvas Emulator: emulator.md
+  - Guide:
+      - Input Formats: formats.md
+      - Commands Reference: reference.md
+      - Canvas Emulator: emulator.md
+      - Troubleshooting: troubleshooting.md
   - Tutorials:
-      - Overview: tutorials/index.md
+      - tutorials/index.md
       - R & Quarto: tutorials/quarto.md
       - Dynamic Exams: tutorials/dynamic-exams.md
       - VS Code Snippets: tutorials/vscode-snippets.md
   - Quarto Extension: extensions/quarto.md
-  - Troubleshooting: troubleshooting.md
   - Contributing: contributing.md
