@@ -93,15 +93,16 @@ npm link
 ```markdown
 # Midterm Exam
 
-## 1. The capital of France is [2 pts]
-
+1. [MC] The capital of France is [2pts]
 a) London
-b) **Paris** ✓
+b) Paris [x]
 c) Berlin
 
-## 2. [TF] Water boils at 100°C at sea level. → True
+2. [TF] Water boils at 100°C at sea level. [1pt]
+a) True [x]
+b) False
 
-## 3. [Essay, 10pts] Explain photosynthesis.
+3. [Essay, 10pts] Explain photosynthesis.
 ```
 
 **Step 2:** Convert to QTI
@@ -120,10 +121,13 @@ Go to **Course Settings → Import Content → QTI .zip** and upload your file.
 
 | Feature | Description |
 |---------|-------------|
-| **6 Question Types** | Multiple choice, true/false, multi-answer, short answer, essay, numeric |
+| **8 Question Types** | Multiple choice, true/false, multi-answer, short answer, essay, numeric, matching, fill-in-blanks |
+| **Clean Syntax** | Write `1. [MC] Question [2pts]` without `##` headers |
 | **LaTeX Math** | Write `$x^2$` or `$$\sum_{i=1}^n x_i$$` — converted automatically |
 | **Image Bundling** | Local images are packaged into the QTI zip automatically |
 | **Canvas Emulator** | Test your package *before* uploading with `examify emulate-canvas` |
+| **Text Export** | Export printable paper exams with `examify quiz.md -f text` |
+| **Batch Conversion** | Convert multiple files: `examify *.md -o output/` |
 | **Quarto Support** | Use R/Python to generate dynamic, randomized questions |
 
 ---
@@ -132,6 +136,8 @@ Go to **Course Settings → Import Content → QTI .zip** and upload your file.
 
 ```bash
 examify <file.md> -o <output.qti.zip>   # Convert markdown to QTI
+examify <file.md> -f text               # Export as printable text
+examify *.md -o output/                 # Batch convert multiple files
 examify emulate-canvas <file.qti.zip>   # Simulate Canvas import
 examify verify <file.qti.zip>           # Validate package structure
 examify check <file.md>                 # Lint markdown for errors
