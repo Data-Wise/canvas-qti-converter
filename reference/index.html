@@ -18,7 +18,7 @@
         <link rel="prev" href="../formats/">
       
       
-        <link rel="next" href="../emulator/">
+        <link rel="next" href="../config/">
       
       
         
@@ -495,6 +495,8 @@
       
         
       
+        
+      
     
     
     
@@ -660,6 +662,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#batch-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Conversion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#text-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Text Export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#verify" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -707,6 +731,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1042,6 +1094,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#batch-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Conversion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#text-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Text Export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#verify" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1175,6 +1249,14 @@
 <td>Convert Markdown to QTI</td>
 </tr>
 <tr>
+<td><code>examify &lt;file&gt; -f text</code></td>
+<td>Export as printable text</td>
+</tr>
+<tr>
+<td><code>examify *.md -o output/</code></td>
+<td>Batch convert multiple files</td>
+</tr>
+<tr>
 <td><code>examify verify &lt;pkg&gt;</code></td>
 <td>Validate package structure</td>
 </tr>
@@ -1196,16 +1278,17 @@
 <h2 id="examify-convert">examify (convert)</h2>
 <p><strong>Usage:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>examify<span class="w"> </span>&lt;input&gt;<span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>examify<span class="w"> </span>&lt;pattern&gt;<span class="w"> </span>-o<span class="w"> </span>&lt;directory&gt;<span class="w">   </span><span class="c1"># Batch mode</span>
 </span></code></pre></div>
 <p><strong>What it does:</strong></p>
 <ul>
 <li>Parses your Markdown file for questions</li>
 <li>Generates QTI 1.2 XML for Canvas Classic Quizzes</li>
 <li>Bundles images with <code>imsmanifest.xml</code></li>
-<li>Creates a <code>.qti.zip</code> package</li>
+<li>Creates a <code>.qti.zip</code> package (or <code>.txt</code> for text export)</li>
 </ul>
 <p><strong>When to use:</strong></p>
-<p>Converting your Markdown quiz files for Canvas import.</p>
+<p>Converting your Markdown quiz files for Canvas import or printable exams.</p>
 <p><strong>Options:</strong></p>
 <table>
 <thead>
@@ -1216,33 +1299,110 @@
 </thead>
 <tbody>
 <tr>
-<td><code>-o, --output &lt;file&gt;</code></td>
-<td>Output path (default: <code>&lt;input&gt;.qti.zip</code>)</td>
+<td><code>-o, --output &lt;path&gt;</code></td>
+<td>Output file or directory (batch mode)</td>
+</tr>
+<tr>
+<td><code>-f, --format &lt;type&gt;</code></td>
+<td>Output format: <code>qti</code> (default) or <code>text</code></td>
 </tr>
 <tr>
 <td><code>-v, --validate</code></td>
 <td>Validate output after generating</td>
 </tr>
 <tr>
+<td><code>-p, --points &lt;n&gt;</code></td>
+<td>Default points per question</td>
+</tr>
+<tr>
+<td><code>-t, --title &lt;title&gt;</code></td>
+<td>Override quiz title</td>
+</tr>
+<tr>
 <td><code>--preview</code></td>
 <td>Preview parsed questions, no file created</td>
 </tr>
+<tr>
+<td><code>--no-answers</code></td>
+<td>Exclude answer key from text export</td>
+</tr>
 </tbody>
 </table>
-<p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Basic conversion</span>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Basic conversion to QTI</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>examify<span class="w"> </span>quiz.md
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Custom output path</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>examify<span class="w"> </span>quiz.md<span class="w"> </span>-o<span class="w"> </span>output/my-quiz.qti.zip
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Preview without generating</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>examify<span class="w"> </span>quiz.md<span class="w"> </span>--preview
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Export as printable text</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>examify<span class="w"> </span>quiz.md<span class="w"> </span>-f<span class="w"> </span>text
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># Text export without answers</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>examify<span class="w"> </span>quiz.md<span class="w"> </span>-f<span class="w"> </span>text<span class="w"> </span>--no-answers
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="c1"># Batch convert all markdown files</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>examify<span class="w"> </span>*.md<span class="w"> </span>-o<span class="w"> </span>output/
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="c1"># Set default points</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>examify<span class="w"> </span>quiz.md<span class="w"> </span>-p<span class="w"> </span><span class="m">2</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="c1"># Preview without generating</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>examify<span class="w"> </span>quiz.md<span class="w"> </span>--preview
+</span></code></pre></div>
+<hr />
+<h2 id="batch-conversion">Batch Conversion</h2>
+<p>Convert multiple files at once using glob patterns:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Convert all .md files in current directory</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>examify<span class="w"> </span>*.md<span class="w"> </span>-o<span class="w"> </span>output/
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Convert files from specific folder</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>examify<span class="w"> </span>exams/*.md<span class="w"> </span>-o<span class="w"> </span>qti-packages/
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Convert specific pattern</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>examify<span class="w"> </span>midterm-*.md<span class="w"> </span>-o<span class="w"> </span>midterms/
+</span></code></pre></div>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Output directory is created if it doesn't exist</li>
+<li>Each file is named based on input: <code>quiz.md</code> → <code>quiz.qti.zip</code></li>
+<li>Errors in one file don't stop processing of others</li>
+<li>Summary shows success/failure counts</li>
+</ul>
+<hr />
+<h2 id="text-export">Text Export</h2>
+<p>Export quizzes as plain text for paper exams:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>examify<span class="w"> </span>quiz.md<span class="w"> </span>-f<span class="w"> </span>text
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>examify<span class="w"> </span>quiz.md<span class="w"> </span>-f<span class="w"> </span>text<span class="w"> </span>-o<span class="w"> </span>exam.txt
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>examify<span class="w"> </span>quiz.md<span class="w"> </span>-f<span class="w"> </span>text<span class="w"> </span>--no-answers
+</span></code></pre></div>
+<p><strong>Output includes:</strong></p>
+<ul>
+<li>Quiz title and header</li>
+<li>Name/Date fields for students</li>
+<li>All questions formatted for printing</li>
+<li>Answer key at the end (unless <code>--no-answers</code>)</li>
+</ul>
+<p><strong>Example output:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>STATISTICS QUIZ 1
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Name: _________________________  Date: _________
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>1. [2 pts] What is the mean of 2, 4, 6?
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>   a) Three
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>   b) Four
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>   c) Five
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>2. [1 pt] TRUE or FALSE: Variance can be negative.
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>---
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>ANSWER KEY
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>1. b
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>2. False
 </span></code></pre></div>
 <hr />
 <h2 id="verify">verify</h2>
 <p><strong>Usage:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>examify<span class="w"> </span>verify<span class="w"> </span>&lt;path&gt;
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>examify<span class="w"> </span>verify<span class="w"> </span>&lt;path&gt;
 </span></code></pre></div>
 <p><strong>What it does:</strong></p>
 <ul>
@@ -1254,13 +1414,13 @@
 <p><strong>When to use:</strong></p>
 <p>Checking an existing QTI package before Canvas import.</p>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>examify<span class="w"> </span>verify<span class="w"> </span>quiz.qti.zip
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>examify<span class="w"> </span>verify<span class="w"> </span>./qti-folder/
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>examify<span class="w"> </span>verify<span class="w"> </span>quiz.qti.zip
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>examify<span class="w"> </span>verify<span class="w"> </span>./qti-folder/
 </span></code></pre></div>
 <hr />
 <h2 id="emulate-canvas">emulate-canvas</h2>
 <p><strong>Usage:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>examify<span class="w"> </span>emulate-canvas<span class="w"> </span>&lt;path&gt;
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>examify<span class="w"> </span>emulate-canvas<span class="w"> </span>&lt;path&gt;
 </span></code></pre></div>
 <p><strong>What it does:</strong></p>
 <ul>
@@ -1272,7 +1432,7 @@
 <p><strong>When to use:</strong></p>
 <p>Before uploading to Canvas, especially for complex quizzes.</p>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>examify<span class="w"> </span>emulate-canvas<span class="w"> </span>quiz.qti.zip
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>examify<span class="w"> </span>emulate-canvas<span class="w"> </span>quiz.qti.zip
 </span></code></pre></div>
 <p><strong>Output includes:</strong></p>
 <ul>
@@ -1284,9 +1444,9 @@
 <hr />
 <h2 id="check-lint">check (lint)</h2>
 <p><strong>Usage:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>examify<span class="w"> </span>check<span class="w"> </span>&lt;input&gt;
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># or</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>examify<span class="w"> </span>lint<span class="w"> </span>&lt;input&gt;
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>examify<span class="w"> </span>check<span class="w"> </span>&lt;input&gt;
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="c1"># or</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>examify<span class="w"> </span>lint<span class="w"> </span>&lt;input&gt;
 </span></code></pre></div>
 <p><strong>What it does:</strong></p>
 <ul>
@@ -1298,7 +1458,7 @@
 <p><strong>When to use:</strong></p>
 <p>Before conversion to catch input errors early.</p>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>examify<span class="w"> </span>check<span class="w"> </span>quiz.md
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>examify<span class="w"> </span>check<span class="w"> </span>quiz.md
 </span></code></pre></div>
 <hr />
 <h2 id="exit-codes">Exit Codes</h2>
@@ -1374,13 +1534,13 @@
         
         
           
-          <a href="../emulator/" class="md-footer__link md-footer__link--next" aria-label="Next: Canvas Emulator">
+          <a href="../config/" class="md-footer__link md-footer__link--next" aria-label="Next: Configuration">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Canvas Emulator
+                Configuration
               </div>
             </div>
             <div class="md-footer__button md-icon">
