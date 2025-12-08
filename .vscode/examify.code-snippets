@@ -1,0 +1,244 @@
+{
+    // Examify - VS Code Snippets for Exam Authoring
+    // Works in VS Code, Positron, and VS Codium
+    // Usage: Type prefix and press Tab to expand
+    // ==========================================
+    // Question Types
+    // ==========================================
+    "Multiple Choice Question": {
+        "prefix": "mcq",
+        "body": [
+            "## ${1:1}. ${2:Question text} [${3:2} pts]",
+            "",
+            "a) ${4:Option A}",
+            "b) ${5:Option B}",
+            "c) **${6:Correct Answer}** ✓",
+            "d) ${7:Option D}",
+            ""
+        ],
+        "description": "Multiple choice question with 4 options"
+    },
+    "Multiple Choice 5 Options": {
+        "prefix": "mcq5",
+        "body": [
+            "## ${1:1}. ${2:Question text} [${3:2} pts]",
+            "",
+            "a) ${4:Option A}",
+            "b) ${5:Option B}",
+            "c) ${6:Option C}",
+            "d) **${7:Correct Answer}** ✓",
+            "e) ${8:Option E}",
+            ""
+        ],
+        "description": "Multiple choice question with 5 options"
+    },
+    "True/False Question": {
+        "prefix": "tfq",
+        "body": [
+            "## ${1:1}. [TF] ${2:Statement to evaluate} → ${3|True,False|}",
+            ""
+        ],
+        "description": "True/False question"
+    },
+    "True/False Inline": {
+        "prefix": "tf",
+        "body": [
+            "## ${1:1}. ${2:Statement} [${3:1} pts]",
+            "",
+            "*${4|True,False|}",
+            "${5|False,True|}",
+            ""
+        ],
+        "description": "True/False with explicit options"
+    },
+    "Essay Question": {
+        "prefix": "essay",
+        "body": [
+            "## ${1:1}. [Essay, ${2:10}pts] ${3:Essay prompt}",
+            "",
+            "${4:Additional instructions or context.}",
+            ""
+        ],
+        "description": "Essay/long answer question"
+    },
+    "Short Answer Question": {
+        "prefix": "short",
+        "body": [
+            "## ${1:1}. [Short] ${2:Question text} [${3:2} pts]",
+            "",
+            "Answer: ${4:Expected answer}",
+            ""
+        ],
+        "description": "Short answer with auto-grading"
+    },
+    "Numeric Question": {
+        "prefix": "numeric",
+        "body": [
+            "## ${1:1}. [Numeric] ${2:Calculate the value of...} [${3:3} pts]",
+            "",
+            "Answer: ${4:42} ± ${5:0.1}",
+            ""
+        ],
+        "description": "Numeric question with tolerance"
+    },
+    "Multiple Answer Question": {
+        "prefix": "multians",
+        "body": [
+            "## ${1:1}. [MultiAns] ${2:Select all that apply...} [${3:3} pts]",
+            "",
+            "a) **${4:Correct option 1}** ✓",
+            "b) ${5:Incorrect option}",
+            "c) **${6:Correct option 2}** ✓",
+            "d) ${7:Incorrect option}",
+            ""
+        ],
+        "description": "Multiple answer (select all that apply)"
+    },
+    // ==========================================
+    // Structure
+    // ==========================================
+    "Exam Header": {
+        "prefix": "examhead",
+        "body": [
+            "# Pool: ${1:Exam Title}",
+            "",
+            "# Section: ${2:Section Name}",
+            ""
+        ],
+        "description": "Exam pool and section headers"
+    },
+    "Section": {
+        "prefix": "section",
+        "body": [
+            "# Section: ${1:Section Name}",
+            ""
+        ],
+        "description": "Section header"
+    },
+    "Pool Header": {
+        "prefix": "pool",
+        "body": [
+            "# Pool: ${1:Pool Name}",
+            ""
+        ],
+        "description": "Question pool header"
+    },
+    // ==========================================
+    // Images and Figures
+    // ==========================================
+    "Question with Image": {
+        "prefix": "mcqimg",
+        "body": [
+            "## ${1:1}. ${2:Based on the figure below...} [${3:2} pts]",
+            "",
+            "![${4:Figure description}](${5:assets/figure.png})",
+            "",
+            "a) ${6:Option A}",
+            "b) **${7:Correct Answer}** ✓",
+            "c) ${8:Option C}",
+            "d) ${9:Option D}",
+            ""
+        ],
+        "description": "Multiple choice with image"
+    },
+    "R Code Figure": {
+        "prefix": "rfig",
+        "body": [
+            "```{r}",
+            "#| echo: false",
+            "#| fig-width: ${1:5}",
+            "#| fig-height: ${2:4}",
+            "#| label: fig-${3:name}",
+            "",
+            "${4:# R code here}",
+            "```",
+            ""
+        ],
+        "description": "R code chunk for figure generation (Quarto)"
+    },
+    "Python Figure": {
+        "prefix": "pyfig",
+        "body": [
+            "```{python}",
+            "#| echo: false",
+            "#| fig-width: ${1:5}",
+            "#| fig-height: ${2:4}",
+            "",
+            "import matplotlib.pyplot as plt",
+            "import numpy as np",
+            "",
+            "${3:# Python code here}",
+            "plt.show()",
+            "```",
+            ""
+        ],
+        "description": "Python code chunk for figure generation (Quarto)"
+    },
+    // ==========================================
+    // Solutions
+    // ==========================================
+    "Solution Block": {
+        "prefix": "solution",
+        "body": [
+            "::: {.solution}",
+            "${1:Solution explanation here.}",
+            ":::",
+            ""
+        ],
+        "description": "Solution block (hidden in student version)"
+    },
+    // ==========================================
+    // Quarto YAML
+    // ==========================================
+    "Quarto Exam YAML": {
+        "prefix": "examyaml",
+        "body": [
+            "---",
+            "title: \"${1:Exam Title}\"",
+            "format:",
+            "  exam-gfm:",
+            "    exam:",
+            "      solutions: false",
+            "      default-points: ${2:2}",
+            "  exam-pdf:",
+            "    exam:",
+            "      solutions: false",
+            "  exam-pdf-solutions:",
+            "    exam:",
+            "      solutions: true",
+            "---",
+            ""
+        ],
+        "description": "Quarto YAML header for exams"
+    },
+    // ==========================================
+    // LaTeX / Math
+    // ==========================================
+    "Inline Math": {
+        "prefix": "imath",
+        "body": "\\$${1:equation}\\$",
+        "description": "Inline LaTeX math"
+    },
+    "Display Math": {
+        "prefix": "dmath",
+        "body": [
+            "$$",
+            "${1:equation}",
+            "$$"
+        ],
+        "description": "Display LaTeX math block"
+    },
+    "Statistics Formula Question": {
+        "prefix": "statq",
+        "body": [
+            "## ${1:1}. Given $\\\\bar{x} = ${2:50}$, $s = ${3:10}$, and $n = ${4:25}$, calculate ${5:the test statistic}. [${6:3} pts]",
+            "",
+            "a) $${7:1.5}$",
+            "b) **$${8:2.0}$** ✓",
+            "c) $${9:2.5}$",
+            "d) $${10:3.0}$",
+            ""
+        ],
+        "description": "Statistics question with formulas"
+    }
+}
