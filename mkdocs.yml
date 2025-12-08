@@ -107,6 +107,7 @@ nav:
   - Tutorials:
     - R & Quarto: tutorials/quarto.md
     - Quarto Examples: tutorials/quarto-examples.md
+    - VS Code Snippets: tutorials/vscode-snippets.md
     - Extension Masterclass: tutorials/quarto-deep-dive.md
     - Best Practices: tutorials/best-practices.md
   - Extensions:
