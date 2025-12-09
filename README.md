@@ -155,34 +155,54 @@ format:
 
 ## Installation
 
-<details>
-<summary><b>Mac (Homebrew)</b> — Recommended</summary>
+### Option 1: No Installation (Recommended for beginners)
 
+Run directly without installing anything (requires [Node.js](https://nodejs.org/)):
+
+```bash
+npx examark quiz.md -o quiz.qti.zip
+```
+
+This downloads and runs examark automatically. Perfect for trying it out!
+
+---
+
+### Option 2: Install Globally
+
+For frequent use, install once and run anytime:
+
+**Mac (Homebrew):**
 ```bash
 brew tap data-wise/tap
 brew install examark
 ```
-</details>
 
-<details>
-<summary><b>npm</b> — All platforms</summary>
-
+**Windows / Mac / Linux (npm):**
 ```bash
 npm install -g examark
 ```
-Requires [Node.js 18+](https://nodejs.org/)
-</details>
+
+After installing, just run:
+```bash
+examark quiz.md -o quiz.qti.zip
+```
+
+---
+
+### First Time on Windows?
+
+If you've never used Node.js before:
+
+1. **Download Node.js** from [nodejs.org](https://nodejs.org/) — click the big green "LTS" button
+2. **Run the installer** — accept all defaults, click Next through everything
+3. **Open Command Prompt** or PowerShell (search "cmd" in Start menu)
+4. **Verify it worked:** `node --version` (should show a version number)
+5. **Run examark:** `npx examark quiz.md -o quiz.qti.zip`
+
+That's it! No complicated setup needed.
 
 <details>
-<summary><b>Windows</b></summary>
-
-1. Install [Node.js](https://nodejs.org/) (v18+)
-2. Run: `npm install -g examark`
-3. Verify: `examark --version`
-</details>
-
-<details>
-<summary><b>From Source</b></summary>
+<summary><b>Advanced: Install from source</b></summary>
 
 ```bash
 git clone https://github.com/Data-Wise/examark.git

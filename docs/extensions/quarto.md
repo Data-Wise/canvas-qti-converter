@@ -21,7 +21,7 @@ This will:
 !!! tip "Pin to a Version"
     For reproducible builds, install a specific release:
     ```bash
-    quarto add Data-Wise/examark@v0.4.2
+    quarto add Data-Wise/examark@v0.6.1
     ```
 
 ### Method 2: Local Installation
@@ -352,6 +352,12 @@ Run the emulator to diagnose:
 
 ```bash
 examark emulate-canvas exam.qti.zip
+```
+
+For Canvas New Quizzes, use strict validation:
+
+```bash
+examark verify exam.qti.zip --strict
 ```
 
 Common fixes:

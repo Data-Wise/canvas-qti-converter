@@ -41,19 +41,26 @@ This downloads and runs Examark on-demand. Perfect for trying it out!
 
 === "Windows"
 
-    **Step 1:** Install [Node.js](https://nodejs.org/) (version 18 or higher)
-    
-    **Step 2:** Open Command Prompt or PowerShell and run:
+    **Never used Node.js before?** No problem! Here's the complete guide:
+
+    1. **Download Node.js** from [nodejs.org](https://nodejs.org/) — click the big green "LTS" button
+    2. **Run the installer** — accept all defaults, click Next through everything
+    3. **Open Command Prompt** — search "cmd" in Start menu
+    4. **Verify Node installed:** type `node --version` and press Enter
+    5. **Install examark:**
 
     ```powershell
     npm install -g examark
     ```
 
-    **Step 3:** Verify installation:
+    6. **Verify it worked:**
 
     ```powershell
     examark --version
     ```
+
+    !!! tip "Quickest Option"
+        Skip the global install and just use `npx examark quiz.md` — it runs without installing!
 
 === "Developer"
 
