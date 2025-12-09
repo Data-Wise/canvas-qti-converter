@@ -13,10 +13,10 @@ title: "My First Exam"
 # Convert to QTI: examark starter-exam.md -o exam.qti.zip
 # ============================================================
 
-format:
-  exam-gfm: default
+format: exam-gfm
 
 exam:
+  qti: true
   solutions: false      # Set to true for answer key
   default-points: 2     # Default points per question
 ---

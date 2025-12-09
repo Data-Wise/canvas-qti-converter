@@ -20,10 +20,10 @@ title: "Dynamic Exam with R Code"
 #   3. examark dynamic-questions.md -o exam.qti.zip
 # ============================================================
 
-format:
-  exam-gfm: default
+format: exam-gfm
 
 exam:
+  qti: true
   solutions: false
   default-points: 2
 ---

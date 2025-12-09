@@ -19,6 +19,7 @@ format:
   exam-html: default
 
 exam:
+  qti: true
   solutions: false
   default-points: 2
 ---
