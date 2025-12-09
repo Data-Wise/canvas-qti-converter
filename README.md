@@ -119,10 +119,10 @@ $$\bar{x} = \frac{\sum x_i}{n}$$
 
 ### 🔧 Powerful CLI
 ```bash
-examark *.md -o output/     # Batch convert
-examark quiz.md -f text     # Paper exams
-examark emulate-canvas pkg  # Pre-validate
-examark check quiz.md       # Lint syntax
+examark *.md -o output/       # Batch convert
+examark quiz.md -f text       # Paper exams
+examark verify pkg --strict   # New Quizzes check
+examark check quiz.md         # Lint syntax
 ```
 
 </td>
@@ -199,12 +199,13 @@ cd examark && npm install && npm run build && npm link
 | `examark <file.md>` | Convert to QTI (default: `file.qti.zip`) |
 | `examark <file.md> -f text` | Export as printable plain text |
 | `examark *.md -o output/` | Batch convert multiple files |
-| `examark emulate-canvas <pkg>` | Simulate Canvas import |
 | `examark verify <pkg>` | Validate QTI package |
+| `examark verify <pkg> --strict` | Strict validation for New Quizzes |
+| `examark emulate-canvas <pkg>` | Simulate Canvas import |
 | `examark check <file.md>` | Lint markdown for errors |
 | `examark --preview` | Preview parsed questions (JSON) |
 
-**Options:** `-o <output>` · `-p <points>` · `-t <title>` · `--no-answers` · `-v`
+**Options:** `-o <output>` · `-p <points>` · `-t <title>` · `--no-answers` · `-v` · `--strict`
 
 ---
 
