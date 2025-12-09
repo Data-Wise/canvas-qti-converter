@@ -21,7 +21,14 @@
       "Bash(npm run build:*)",
       "Bash(npm test:*)",
       "Bash(npx vitest:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(gh run list:*)",
+      "Bash(for:*)",
+      "Bash(do [ -f \"$f\" ])",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(mkdocs build:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

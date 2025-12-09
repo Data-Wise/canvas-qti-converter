@@ -41,13 +41,13 @@ ls _extensions/exam/
 
 ## Quick Start
 
-1. Create a `.qmd` file with the `exam-gfm` format:
+1. Create a `.qmd` file with the `exam-qti` format:
 
 ```yaml
 ---
 title: "My Quiz"
 format:
-  exam-gfm: default
+  exam-qti: default
 ---
 
 ## 1. What is 2 + 2?
@@ -60,7 +60,7 @@ c) 5
 2. Render to Markdown:
 
 ```bash
-quarto render quiz.qmd --to exam-gfm
+quarto render quiz.qmd --to exam-qti
 ```
 
 3. Convert to Canvas QTI:
@@ -69,11 +69,14 @@ quarto render quiz.qmd --to exam-gfm
 examark quiz.md -o quiz.qti.zip
 ```
 
+!!! note "LaTeX Math Works Automatically"
+    The `exam-qti` format preserves `$...$` and `$$...$$` math notation by default. No extra configuration needed!
+
 ## Available Formats
 
 | Format | Best For | Output |
 |--------|----------|--------|
-| `exam-gfm` | Canvas import | Markdown → QTI |
+| `exam-qti` | LMS import (Canvas, Blackboard, Moodle) | Markdown → QTI |
 | `exam-html` | Browser preview | Interactive HTML |
 | `exam-pdf` | Printable exams | PDF (student version) |
 | `exam-pdf-solutions` | Answer keys | PDF (with solutions) |
@@ -81,13 +84,16 @@ examark quiz.md -o quiz.qti.zip
 | `exam-odt` | LibreOffice/Google | OpenDocument |
 | `exam-typst` | Modern PDF | Typst PDF |
 
+!!! tip "Backward Compatibility"
+    `exam-gfm` still works as an alias for `exam-qti`.
+
 ### Multi-Format Rendering
 
 Render to multiple formats simultaneously:
 
 ```yaml
 format:
-  exam-gfm: default      # For Canvas
+  exam-qti: default      # For LMS import
   exam-pdf: default      # For printing
   exam-html: default     # For preview
 ```
@@ -104,8 +110,7 @@ quarto render exam.qmd  # Renders all formats
 ---
 title: "Statistics Midterm"
 format:
-  exam-gfm:
-    variant: +tex_math_dollars  # Enable LaTeX math
+  exam-qti: default      # LaTeX math enabled by default
 
 exam:
   solutions: false       # Hide solution blocks
@@ -228,7 +233,7 @@ c) 5
 
 | Format | Solutions Visible |
 |--------|-------------------|
-| `exam-gfm` | Hidden |
+| `exam-qti` | Hidden |
 | `exam-pdf` | Hidden |
 | `exam-pdf-solutions` | Visible |
 | `exam-html` | Hidden (default) |
@@ -254,14 +259,14 @@ Enable auto-export in your YAML:
 
 ```yaml
 format:
-  exam-gfm:
+  exam-qti:
     qti-export: true
 ```
 
 Now `quarto render` automatically creates the QTI zip:
 
 ```bash
-quarto render exam.qmd --to exam-gfm
+quarto render exam.qmd --to exam-qti
 # Creates: exam.md AND exam.qti.zip
 ```
 
@@ -277,13 +282,8 @@ b) $s^2 = \frac{\sum(x_i - \bar{x})^2}{n-1}$ [correct]
 c) $\sigma = \sqrt{\sigma^2}$
 ```
 
-**Tip:** Use `+tex_math_dollars` variant for best compatibility:
-
-```yaml
-format:
-  exam-gfm:
-    variant: +tex_math_dollars
-```
+!!! tip "Math is enabled by default"
+    The `exam-qti` format includes `+tex_math_dollars` automatically. No extra configuration needed!
 
 ## Images and Figures
 

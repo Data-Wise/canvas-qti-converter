@@ -1,6 +1,6 @@
 title: Quarto Exam Extension
 author: Davood Tofighi
-version: 0.6.1
+version: 0.7.0
 quarto-required: ">=1.4.0"
 
 # Shared exam options used across all formats
@@ -149,17 +149,30 @@ contributes:
         grading-table: true
 
     # =========================================
-    # Markdown for QTI Conversion
+    # QTI Export (for Canvas, Blackboard, Moodle, etc.)
     # =========================================
-    exam-gfm:
-      variant: gfm
+    exam-qti:
+      variant: gfm+tex_math_dollars
       filters:
         - exam-filter.lua
       post-render:
         - qti-post-render.js
       exam:
         solutions: false
+        default-points: 2
         # Include answer markers for QTI parsing
+        include-answers: true
+
+    # Backward compatibility alias
+    exam-gfm:
+      variant: gfm+tex_math_dollars
+      filters:
+        - exam-filter.lua
+      post-render:
+        - qti-post-render.js
+      exam:
+        solutions: false
+        default-points: 2
         include-answers: true
 
     # =========================================

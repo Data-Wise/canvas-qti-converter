@@ -143,7 +143,7 @@ Local images automatically packaged into QTI.
 Dynamic questions with R/Python.
 ```yaml
 format:
-  exam-gfm: default
+  exam-qti: default
   exam-pdf: default
 ```
 
