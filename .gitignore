@@ -28,5 +28,8 @@ tmp/
 # Scratch
 scratch/
 
+# Extension copies in examples (source is _extensions/)
+examples/_extensions/
+
 # Documentation
 site/
