@@ -18,7 +18,7 @@ const program = new Command();
 program
   .name('examark')
   .description('Create exams from Markdown and export to Canvas QTI format')
-  .version('0.6.2');
+  .version('0.6.3');
 
 interface VerifyOptions {
   strict?: boolean;
