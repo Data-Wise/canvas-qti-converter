@@ -89,8 +89,35 @@ For full automation, these secrets must be configured in GitHub repository setti
 
 | Secret | Purpose |
 |--------|---------|
-| `NPM_TOKEN` | npm publish access token ([create here](https://www.npmjs.com/settings/~/tokens)) |
-| `HOMEBREW_TAP_TOKEN` | Personal access token with `repo` scope for homebrew-tap |
+| `NPM_TOKEN` | npm granular access token with publish permissions |
+| `HOMEBREW_TAP_TOKEN` | GitHub PAT with `repo` scope for homebrew-tap |
+
+#### Creating NPM_TOKEN (Granular Access Token)
+
+As of November 2025, npm only supports **granular access tokens** (classic tokens are deprecated).
+
+1. Go to [npmjs.com → Access Tokens](https://www.npmjs.com/settings/~/tokens)
+2. Click **"Generate New Token"** → **"Granular Access Token"**
+3. Configure:
+   - **Token name**: `examark-ci-publish`
+   - **Expiration**: Up to 90 days max (you'll need to rotate periodically)
+   - **Packages and scopes**: Select "Only select packages and scopes" → add `examark`
+   - **Permissions**: **Read and write**
+   - **Organizations**: Select your org if applicable
+4. Copy token and add as `NPM_TOKEN` secret in GitHub
+
+!!! tip "Alternative: Trusted Publishing"
+    For even better security, consider [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/) which uses OIDC and eliminates long-lived tokens entirely. Requires npm CLI 11.5.1+.
+
+#### Creating HOMEBREW_TAP_TOKEN
+
+1. Go to [GitHub Settings → Tokens](https://github.com/settings/tokens)
+2. Click **"Generate new token"** → **"Generate new token (classic)"**
+3. Configure:
+   - **Note**: `examark-homebrew-tap`
+   - **Expiration**: 90 days or custom
+   - **Scopes**: Select `repo` (full control of private repositories)
+4. Copy token and add as `HOMEBREW_TAP_TOKEN` secret in GitHub
 
 ### Running Tests
 
