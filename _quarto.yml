@@ -19,10 +19,12 @@ project:
 #
 # =============================================================================
 
-# Default format for examples (inherits from exam extension)
-format: exam-html
+# Default format for all documents in this project
+# Uses the exam extension (from _extensions/exam/)
+format:
+  exam-html: default
 
-# Default exam options
+# Default exam options (merged with extension defaults)
 exam:
   solutions: false
   default-points: 2
