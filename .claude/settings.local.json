@@ -52,7 +52,9 @@
       "Bash(grep:*)",
       "Bash(ls:*)",
       "Bash(node:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(./install.sh)",
+      "Bash(do)"
     ],
     "deny": [],
     "ask": []
