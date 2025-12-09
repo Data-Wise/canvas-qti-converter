@@ -276,3 +276,250 @@ describe('QtiValidator', () => {
     expect(report.errors.some(e => e.includes("Unsupported Canvas interaction 'orderInteraction'"))).toBe(true);
   });
 });
+
+describe('QtiValidator Strict Mode', () => {
+  let tempDir: string;
+  let strictValidator: QtiValidator;
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'qti-strict-test-'));
+    strictValidator = new QtiValidator({ strict: true });
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('should pass strict validation for compliant QTI 1.2', async () => {
+    // Create a fully compliant QTI 1.2 file
+    writeFileSync(join(tempDir, 'quiz.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+      <questestinterop>
+        <assessment ident="test_assessment" title="Compliant Quiz">
+          <section ident="root_section">
+            <item ident="item_1" title="Question 1">
+              <itemmetadata>
+                <qtimetadata>
+                  <qtimetadatafield>
+                    <fieldlabel>question_type</fieldlabel>
+                    <fieldentry>multiple_choice_question</fieldentry>
+                  </qtimetadatafield>
+                  <qtimetadatafield>
+                    <fieldlabel>points_possible</fieldlabel>
+                    <fieldentry>2</fieldentry>
+                  </qtimetadatafield>
+                </qtimetadata>
+              </itemmetadata>
+              <presentation>
+                <material><mattext texttype="text/html">What is 2 + 2?</mattext></material>
+                <response_lid ident="response1" rcardinality="Single">
+                  <render_choice>
+                    <response_label ident="a"><material><mattext>Three</mattext></material></response_label>
+                    <response_label ident="b"><material><mattext>Four</mattext></material></response_label>
+                  </render_choice>
+                </response_lid>
+              </presentation>
+              <resprocessing>
+                <outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
+                <respcondition continue="No">
+                  <conditionvar><varequal respident="response1">b</varequal></conditionvar>
+                  <setvar varname="SCORE" action="Set">100</setvar>
+                </respcondition>
+              </resprocessing>
+            </item>
+          </section>
+        </assessment>
+      </questestinterop>`);
+
+    const report = await strictValidator.validatePackage(tempDir);
+    expect(report.isValid).toBe(true);
+    expect(report.details.itemCount).toBe(1);
+  });
+
+  it('should fail strict validation if assessment missing ident', async () => {
+    writeFileSync(join(tempDir, 'quiz.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+      <questestinterop>
+        <assessment title="Missing Ident Quiz">
+          <section ident="root">
+            <item ident="q1" title="Q1">
+              <itemmetadata><qtimetadata>
+                <qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>multiple_choice_question</fieldentry></qtimetadatafield>
+                <qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
+              </qtimetadata></itemmetadata>
+              <presentation>
+                <material><mattext>Test?</mattext></material>
+                <response_lid ident="r1"><render_choice>
+                  <response_label ident="a"><material><mattext>A</mattext></material></response_label>
+                  <response_label ident="b"><material><mattext>B</mattext></material></response_label>
+                </render_choice></response_lid>
+              </presentation>
+              <resprocessing>
+                <outcomes><decvar varname="SCORE" vartype="Decimal"/></outcomes>
+                <respcondition><conditionvar><varequal respident="r1">a</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition>
+              </resprocessing>
+            </item>
+          </section>
+        </assessment>
+      </questestinterop>`);
+
+    const report = await strictValidator.validatePackage(tempDir);
+    expect(report.isValid).toBe(false);
+    expect(report.errors.some(e => e.includes('Strict: Assessment missing required "ident"'))).toBe(true);
+  });
+
+  it('should fail strict validation if item missing points_possible', async () => {
+    writeFileSync(join(tempDir, 'quiz.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+      <questestinterop>
+        <assessment ident="test" title="Test">
+          <section ident="root">
+            <item ident="q1" title="Q1">
+              <itemmetadata><qtimetadata>
+                <qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>multiple_choice_question</fieldentry></qtimetadatafield>
+                <!-- Missing points_possible -->
+              </qtimetadata></itemmetadata>
+              <presentation>
+                <material><mattext>Test?</mattext></material>
+                <response_lid ident="r1"><render_choice>
+                  <response_label ident="a"><material><mattext>A</mattext></material></response_label>
+                  <response_label ident="b"><material><mattext>B</mattext></material></response_label>
+                </render_choice></response_lid>
+              </presentation>
+              <resprocessing>
+                <outcomes><decvar varname="SCORE" vartype="Decimal"/></outcomes>
+                <respcondition><conditionvar><varequal respident="r1">a</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition>
+              </resprocessing>
+            </item>
+          </section>
+        </assessment>
+      </questestinterop>`);
+
+    const report = await strictValidator.validatePackage(tempDir);
+    expect(report.isValid).toBe(false);
+    expect(report.errors.some(e => e.includes('Strict: Item q1 missing "points_possible"'))).toBe(true);
+  });
+
+  it('should fail strict validation if item missing question_type', async () => {
+    writeFileSync(join(tempDir, 'quiz.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+      <questestinterop>
+        <assessment ident="test" title="Test">
+          <section ident="root">
+            <item ident="q1" title="Q1">
+              <itemmetadata><qtimetadata>
+                <!-- Missing question_type -->
+                <qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
+              </qtimetadata></itemmetadata>
+              <presentation>
+                <material><mattext>Test?</mattext></material>
+                <response_lid ident="r1"><render_choice>
+                  <response_label ident="a"><material><mattext>A</mattext></material></response_label>
+                  <response_label ident="b"><material><mattext>B</mattext></material></response_label>
+                </render_choice></response_lid>
+              </presentation>
+              <resprocessing>
+                <outcomes><decvar varname="SCORE" vartype="Decimal"/></outcomes>
+                <respcondition><conditionvar><varequal respident="r1">a</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition>
+              </resprocessing>
+            </item>
+          </section>
+        </assessment>
+      </questestinterop>`);
+
+    const report = await strictValidator.validatePackage(tempDir);
+    expect(report.isValid).toBe(false);
+    expect(report.errors.some(e => e.includes('Strict: Item q1 missing "question_type"'))).toBe(true);
+  });
+
+  it('should fail strict validation if item missing itemmetadata', async () => {
+    writeFileSync(join(tempDir, 'quiz.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+      <questestinterop>
+        <assessment ident="test" title="Test">
+          <section ident="root">
+            <item ident="q1" title="Q1">
+              <!-- Missing itemmetadata entirely -->
+              <presentation>
+                <material><mattext>Test?</mattext></material>
+                <response_lid ident="r1"><render_choice>
+                  <response_label ident="a"><material><mattext>A</mattext></material></response_label>
+                  <response_label ident="b"><material><mattext>B</mattext></material></response_label>
+                </render_choice></response_lid>
+              </presentation>
+              <resprocessing>
+                <outcomes><decvar varname="SCORE" vartype="Decimal"/></outcomes>
+                <respcondition><conditionvar><varequal respident="r1">a</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition>
+              </resprocessing>
+            </item>
+          </section>
+        </assessment>
+      </questestinterop>`);
+
+    const report = await strictValidator.validatePackage(tempDir);
+    expect(report.isValid).toBe(false);
+    expect(report.errors.some(e => e.includes('Strict: Item q1 missing <itemmetadata>'))).toBe(true);
+  });
+
+  it('should fail strict validation if item missing resprocessing', async () => {
+    writeFileSync(join(tempDir, 'quiz.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+      <questestinterop>
+        <assessment ident="test" title="Test">
+          <section ident="root">
+            <item ident="q1" title="Q1">
+              <itemmetadata><qtimetadata>
+                <qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>multiple_choice_question</fieldentry></qtimetadatafield>
+                <qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
+              </qtimetadata></itemmetadata>
+              <presentation>
+                <material><mattext>Test?</mattext></material>
+                <response_lid ident="r1"><render_choice>
+                  <response_label ident="a"><material><mattext>A</mattext></material></response_label>
+                  <response_label ident="b"><material><mattext>B</mattext></material></response_label>
+                </render_choice></response_lid>
+              </presentation>
+              <!-- Missing resprocessing -->
+            </item>
+          </section>
+        </assessment>
+      </questestinterop>`);
+
+    const report = await strictValidator.validatePackage(tempDir);
+    expect(report.isValid).toBe(false);
+    expect(report.errors.some(e => e.includes('Strict: Item q1 missing required <resprocessing>'))).toBe(true);
+  });
+
+  it('should pass standard validation but show warnings in strict mode', async () => {
+    const standardValidator = new QtiValidator();
+
+    // Item without title attribute (passes standard, warns in strict)
+    writeFileSync(join(tempDir, 'quiz.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+      <questestinterop>
+        <assessment ident="test" title="Test">
+          <section ident="root">
+            <item ident="q1">
+              <itemmetadata><qtimetadata>
+                <qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>multiple_choice_question</fieldentry></qtimetadatafield>
+                <qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
+              </qtimetadata></itemmetadata>
+              <presentation>
+                <material><mattext>Test?</mattext></material>
+                <response_lid ident="r1"><render_choice>
+                  <response_label ident="a"><material><mattext>A</mattext></material></response_label>
+                  <response_label ident="b"><material><mattext>B</mattext></material></response_label>
+                </render_choice></response_lid>
+              </presentation>
+              <resprocessing>
+                <outcomes><decvar varname="SCORE" vartype="Decimal"/></outcomes>
+                <respcondition><conditionvar><varequal respident="r1">a</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition>
+              </resprocessing>
+            </item>
+          </section>
+        </assessment>
+      </questestinterop>`);
+
+    // Standard validation should pass with no warnings
+    const standardReport = await standardValidator.validatePackage(tempDir);
+    expect(standardReport.isValid).toBe(true);
+
+    // Strict validation should pass but with warnings
+    const strictReport = await strictValidator.validatePackage(tempDir);
+    expect(strictReport.isValid).toBe(true);
+    expect(strictReport.warnings.some(w => w.includes('Strict: Item q1 missing "title"'))).toBe(true);
+  });
+});

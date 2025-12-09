@@ -8,7 +8,7 @@ Examark converts Markdown exam files to QTI 1.2 packages for Canvas LMS import.
 
 - **Repo**: Data-Wise/examark
 - **Docs**: https://data-wise.github.io/examark/
-- **Version**: 0.6.0 | **Tests**: 188 passing
+- **Version**: 0.6.0 | **Tests**: 195 passing
 - **Distribution**: npm (`examark`), Homebrew (`data-wise/tap/examark`)
 
 ## History
@@ -20,6 +20,36 @@ Examark converts Markdown exam files to QTI 1.2 packages for Canvas LMS import.
 - npm: `examify` deprecated with redirect message
 - Homebrew: `examify` formula deprecated
 - GitHub: Old URLs auto-redirect
+
+## Roadmap: Canvas New Quizzes Support
+
+**Background:** Canvas New Quizzes accepts QTI 1.2 but is stricter about compliance than Classic Quizzes. No official sunset date for Classic Quizzes exists (Instructure removed the June 2024 deadline).
+
+**Plan:**
+
+| Phase | Feature | Status |
+|-------|---------|--------|
+| 1 | Strict validation mode (`--strict`) | ✅ Complete |
+| 2 | Audit/Fix non-compliant QTI output | ✅ Complete (already compliant) |
+| 3 | QTI 2.1 export (future, if needed) | Not Started |
+
+**Phase 1: Strict Validation** ✅
+- Added `examark verify --strict` flag
+- Added `examark emulate-canvas --strict` flag
+- Validates required metadata: `question_type`, `points_possible`
+- Validates required elements: `itemmetadata`, `resprocessing`
+- Validates identifier formats
+- 7 new tests for strict validation
+
+**Phase 2: Compliance Audit** ✅
+- Audited generated XML - already fully compliant
+- Current QTI output includes all required metadata and structure
+- No fixes needed - existing output passes strict validation
+
+**Research (Dec 2025):**
+- UNM Canvas: Both Classic and New Quizzes enabled, no migration deadline
+- Canvas QTI 2.1: Supported in both quiz types
+- New Quizzes: Stricter validation, same QTI format
 
 ## Build & Test Commands
 
@@ -61,6 +91,7 @@ examark exams/*.md -f text            # Export multiple files as text
 
 # Validation and utilities
 examark verify package.qti.zip         # Validate package structure
+examark verify package.qti.zip --strict # Strict validation for New Quizzes
 examark emulate-canvas package.qti.zip # Simulate Canvas import
 examark check input.md                 # Lint markdown for errors
 ```
