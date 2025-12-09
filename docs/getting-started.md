@@ -165,12 +165,15 @@ Output:
 
 Start with a ready-made template:
 
+**Markdown (no Quarto needed):**
+
 | Template | Questions | Best For |
 |----------|-----------|----------|
-| [`starter-exam-md.md`](https://github.com/Data-Wise/examark/blob/main/examples/starter-exam-md.md) | 7 | Beginners |
-| [`canvas-ready.md`](https://github.com/Data-Wise/examark/blob/main/examples/canvas-ready.md) | 21 | Full feature coverage |
+| [`minimal.md`](https://github.com/Data-Wise/examark/blob/main/templates/markdown/minimal.md) | 3 | Quickest start |
+| [`starter.md`](https://github.com/Data-Wise/examark/blob/main/templates/markdown/starter.md) | 6 | Beginners |
+| [`all-question-types.md`](https://github.com/Data-Wise/examark/blob/main/templates/markdown/all-question-types.md) | 15+ | All 8 question types |
 
-**Quarto users:** See the [Quarto Extension](extensions/quarto.md) for `.qmd` templates.
+**Quarto (R/Python):** See the [Quarto Extension](extensions/quarto.md) for `.qmd` templates.
 
 ---
 

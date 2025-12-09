@@ -361,8 +361,8 @@ format:
 
 Download ready-to-use templates:
 
-- [dynamic-questions.qmd](https://github.com/Data-Wise/examark/blob/main/examples/dynamic-questions.qmd) — Full R integration example
-- [canvas-export.qmd](https://github.com/Data-Wise/examark/blob/main/examples/canvas-export.qmd) — Canvas-optimized template
+- [dynamic.qmd](https://github.com/Data-Wise/examark/blob/main/templates/quarto/dynamic.qmd) — Randomized questions with R
+- [canvas-export.qmd](https://github.com/Data-Wise/examark/blob/main/examples/quarto/canvas-export.qmd) — Canvas-optimized example
 
 ---
 

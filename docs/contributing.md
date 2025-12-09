@@ -160,7 +160,7 @@ npm run build
 
 ```bash
 # Convert a test file
-examark examples/sample-quiz.md -o test.qti.zip
+examark templates/markdown/starter.md -o test.qti.zip
 
 # Validate the output
 examark verify test.qti.zip

@@ -30,10 +30,10 @@ Ready-to-use templates to get you started quickly.
 
     ```bash
     # Minimal (3 questions)
-    curl -O https://raw.githubusercontent.com/Data-Wise/examark/main/examples/minimal.md
+    curl -O https://raw.githubusercontent.com/Data-Wise/examark/main/templates/markdown/minimal.md
 
     # Full starter template
-    curl -O https://raw.githubusercontent.com/Data-Wise/examark/main/examples/starter-exam-md.md
+    curl -O https://raw.githubusercontent.com/Data-Wise/examark/main/templates/markdown/starter.md
     ```
 
 === "Quarto (R/Python)"
@@ -43,11 +43,12 @@ Ready-to-use templates to get you started quickly.
     quarto add Data-Wise/examark
 
     # Download template
-    curl -O https://raw.githubusercontent.com/Data-Wise/examark/main/examples/starter-exam.qmd
+    curl -O https://raw.githubusercontent.com/Data-Wise/examark/main/templates/quarto/starter.qmd
     ```
 
 ---
 
 ## All Templates on GitHub
 
-[Browse all templates :material-github:](https://github.com/Data-Wise/examark/tree/main/examples){ .md-button .md-button--primary }
+[Browse templates :material-github:](https://github.com/Data-Wise/examark/tree/main/templates){ .md-button .md-button--primary }
+[Browse examples :material-github:](https://github.com/Data-Wise/examark/tree/main/examples){ .md-button }
