@@ -16,10 +16,17 @@ export interface DiagnosticReport {
   };
 }
 
+export interface ValidatorOptions {
+  /** Strict mode for New Quizzes compatibility */
+  strict?: boolean;
+}
+
 export class QtiValidator {
   private parser: XMLParser;
+  private options: ValidatorOptions;
 
-  constructor() {
+  constructor(options: ValidatorOptions = {}) {
+    this.options = options;
     this.parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
@@ -31,7 +38,9 @@ export class QtiValidator {
     });
   }
 
-  async validatePackage(path: string): Promise<DiagnosticReport> {
+  async validatePackage(path: string, options?: ValidatorOptions): Promise<DiagnosticReport> {
+    // Allow per-call options override
+    const opts = { ...this.options, ...options };
     const report: DiagnosticReport = {
       isValid: true,
       errors: [],
@@ -89,7 +98,7 @@ export class QtiValidator {
           
           if (json.questestinterop) {
             // This is QTI 1.2 format - validate it
-            return this.validateQti12(json, xmlFile, report);
+            return this.validateQti12(json, xmlFile, report, opts);
           }
         } catch (e) {
           // Continue checking other files
@@ -364,8 +373,15 @@ export class QtiValidator {
   /**
    * Validate QTI 1.2 format (Canvas Classic Quizzes)
    * Expects <questestinterop> root with <assessment> and <item> elements
+   *
+   * In strict mode (for New Quizzes compatibility):
+   * - Validates proper QTI structure more rigorously
+   * - Checks for required metadata fields
+   * - Validates response processing completeness
+   * - Ensures all items have explicit point values
    */
-  private validateQti12(json: any, filePath: string, report: DiagnosticReport): DiagnosticReport {
+  private validateQti12(json: any, filePath: string, report: DiagnosticReport, opts: ValidatorOptions = {}): DiagnosticReport {
+    const strict = opts.strict || false;
     const qti = json.questestinterop;
     const assessment = qti.assessment;
     
@@ -381,7 +397,17 @@ export class QtiValidator {
     
     // Get assessment title
     const title = assessment['@_title'] || assessment['@_ident'] || 'Untitled';
-    
+
+    // Strict mode: check for required assessment attributes
+    if (strict) {
+      if (!assessment['@_ident']) {
+        report.errors.push('Strict: Assessment missing required "ident" attribute');
+      }
+      if (!assessment['@_title']) {
+        report.warnings.push('Strict: Assessment missing "title" attribute (recommended)');
+      }
+    }
+
     // Find items in sections
     const section = assessment.section;
     if (!section) {
@@ -436,15 +462,54 @@ export class QtiValidator {
       // Get question type from metadata
       const metadata = item.itemmetadata?.qtimetadata?.qtimetadatafield;
       let questionType = 'unknown';
+      let pointsValue: number | null = null;
+
       if (metadata) {
-        const typeField = Array.isArray(metadata) 
-          ? metadata.find((f: any) => f.fieldlabel === 'question_type')
-          : (metadata.fieldlabel === 'question_type' ? metadata : null);
+        const metaFields = Array.isArray(metadata) ? metadata : [metadata];
+
+        const typeField = metaFields.find((f: any) => f.fieldlabel === 'question_type');
         if (typeField) {
           questionType = typeField.fieldentry || 'unknown';
         }
+
+        const pointsField = metaFields.find((f: any) => f.fieldlabel === 'points_possible');
+        if (pointsField) {
+          pointsValue = parseFloat(pointsField.fieldentry);
+        }
       }
-      
+
+      // Strict mode: additional item-level validations
+      if (strict) {
+        // Check for required metadata
+        if (!item.itemmetadata?.qtimetadata) {
+          report.errors.push(`Strict: Item ${itemIdent} missing <itemmetadata> with <qtimetadata>`);
+        }
+
+        // Check for explicit point value
+        if (pointsValue === null || isNaN(pointsValue)) {
+          report.errors.push(`Strict: Item ${itemIdent} missing "points_possible" metadata`);
+        } else if (pointsValue <= 0) {
+          report.warnings.push(`Strict: Item ${itemIdent} has zero or negative points (${pointsValue})`);
+        }
+
+        // Check for question_type metadata (required for Canvas import)
+        if (questionType === 'unknown') {
+          report.errors.push(`Strict: Item ${itemIdent} missing "question_type" metadata`);
+        }
+
+        // Check for valid item identifier format
+        if (!item['@_ident']) {
+          report.errors.push(`Strict: Item missing required "ident" attribute`);
+        } else if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(itemIdent)) {
+          report.errors.push(`Strict: Item identifier "${itemIdent}" contains invalid characters`);
+        }
+
+        // Check item title (recommended for New Quizzes)
+        if (!item['@_title']) {
+          report.warnings.push(`Strict: Item ${itemIdent} missing "title" attribute (recommended)`);
+        }
+      }
+
       if (responseLid) {
         // Multiple choice / True-False
         const renderChoice = responseLid.render_choice;
@@ -465,12 +530,38 @@ export class QtiValidator {
           const varequal = condVar?.varequal;
           const andBlock = condVar?.and;
           const hasCorrect = varequal || (andBlock && (andBlock.varequal || (Array.isArray(andBlock) && andBlock.some((a: any) => a.varequal))));
-          
+
           if (!hasCorrect && questionType !== 'essay_question' && questionType !== 'short_answer_question') {
             report.errors.push(`Canvas import may fail: No correct answer defined for item ${itemIdent}`);
           }
+
+          // Strict mode: validate resprocessing structure completeness
+          if (strict) {
+            // Check for setvar (score assignment)
+            const setvar = respcondition?.setvar;
+            if (!setvar) {
+              report.warnings.push(`Strict: Item ${itemIdent} resprocessing missing <setvar> for score assignment`);
+            } else {
+              // Verify varname and action attributes
+              const varname = setvar['@_varname'] || setvar['@_respident'];
+              const action = setvar['@_action'] || setvar['@_actoin']; // Canvas uses "actoin" typo
+              if (!varname && !action) {
+                report.warnings.push(`Strict: Item ${itemIdent} setvar missing varname/action attributes`);
+              }
+            }
+
+            // Check outcomes (decvar)
+            const outcomes = resprocessing.outcomes;
+            if (!outcomes?.decvar) {
+              report.warnings.push(`Strict: Item ${itemIdent} missing <outcomes><decvar> declaration`);
+            }
+          }
         } else if (questionType !== 'essay_question' && questionType !== 'short_answer_question') {
-          report.warnings.push(`Item ${itemIdent} missing <resprocessing> (may need manual grading)`);
+          if (strict) {
+            report.errors.push(`Strict: Item ${itemIdent} missing required <resprocessing> element`);
+          } else {
+            report.warnings.push(`Item ${itemIdent} missing <resprocessing> (may need manual grading)`);
+          }
         }
       } else if (responseStr) {
         // Essay / Short Answer / Numeric - no options needed

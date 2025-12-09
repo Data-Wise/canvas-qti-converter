@@ -12,6 +12,7 @@ Complete command reference for Examark CLI.
 | `examark <file> -f text` | Export as printable text |
 | `examark *.md -o output/` | Batch convert multiple files |
 | `examark verify <pkg>` | Validate package structure |
+| `examark verify <pkg> --strict` | Strict validation for New Quizzes |
 | `examark emulate-canvas <pkg>` | Simulate Canvas import |
 | `examark check <file>` | Lint input file |
 | `examark <file> --preview` | Preview parsed questions |
@@ -144,7 +145,7 @@ ANSWER KEY
 **Usage:**
 
 ```bash
-examark verify <path>
+examark verify <path> [options]
 ```
 
 **What it does:**
@@ -154,16 +155,37 @@ examark verify <path>
 - Validates XML syntax
 - Reports missing or malformed files
 
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--strict` | Enable strict validation for New Quizzes compatibility |
+
 **When to use:**
 
-Checking an existing QTI package before Canvas import.
+Checking an existing QTI package before Canvas import. Use `--strict` for Canvas New Quizzes.
 
-**Example:**
+**Examples:**
 
 ```bash
+# Standard validation
 examark verify quiz.qti.zip
 examark verify ./qti-folder/
+
+# Strict validation for New Quizzes
+examark verify quiz.qti.zip --strict
 ```
+
+**Strict Mode Checks:**
+
+When `--strict` is enabled, additional validations are performed:
+
+- Assessment must have `ident` attribute
+- Each item must have `itemmetadata` with `qtimetadata`
+- Each item must have `question_type` metadata
+- Each item must have `points_possible` metadata
+- Each item must have `resprocessing` element (for auto-graded questions)
+- Item identifiers must be alphanumeric with underscores only
 
 ---
 
@@ -172,7 +194,7 @@ examark verify ./qti-folder/
 **Usage:**
 
 ```bash
-examark emulate-canvas <path>
+examark emulate-canvas <path> [options]
 ```
 
 **What it does:**
@@ -182,14 +204,24 @@ examark emulate-canvas <path>
 - Checks for duplicate IDs
 - Predicts import success or failure
 
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--strict` | Enable strict validation for New Quizzes compatibility |
+
 **When to use:**
 
-Before uploading to Canvas, especially for complex quizzes.
+Before uploading to Canvas, especially for complex quizzes. Use `--strict` if targeting Canvas New Quizzes.
 
-**Example:**
+**Examples:**
 
 ```bash
+# Emulate Classic Quizzes import
 examark emulate-canvas quiz.qti.zip
+
+# Emulate New Quizzes import (stricter)
+examark emulate-canvas quiz.qti.zip --strict
 ```
 
 **Output includes:**

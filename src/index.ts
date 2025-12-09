@@ -20,13 +20,19 @@ program
   .description('Create exams from Markdown and export to Canvas QTI format')
   .version('0.6.0');
 
+interface VerifyOptions {
+  strict?: boolean;
+}
+
 program
   .command('verify')
   .description('Verify a QTI package')
   .argument('<path>', 'Path to QTI zip or directory')
-  .action(async (path: string) => {
-    console.log(`Verifying package: ${path}...`);
-    const validator = new QtiValidator();
+  .option('--strict', 'Enable strict validation for New Quizzes compatibility')
+  .action(async (path: string, options: VerifyOptions) => {
+    const mode = options.strict ? 'strict mode' : 'standard mode';
+    console.log(`Verifying package: ${path} (${mode})...`);
+    const validator = new QtiValidator({ strict: options.strict });
     const report = await validator.validatePackage(path);
     
     if (report.isValid) {
@@ -50,11 +56,12 @@ program
   .command('emulate-canvas')
   .description('Simulate Canvas LMS import and predict success/failure')
   .argument('<path>', 'Path to QTI zip or directory')
-  .action(async (path: string) => {
+  .option('--strict', 'Enable strict validation for New Quizzes compatibility')
+  .action(async (path: string, options: VerifyOptions) => {
     console.log(`\n🎓 Canvas Import Emulator\n`);
-    console.log(`Analyzing: ${path}\n`);
-    
-    const validator = new QtiValidator();
+    console.log(`Analyzing: ${path}${options.strict ? ' (strict mode for New Quizzes)' : ''}\n`);
+
+    const validator = new QtiValidator({ strict: options.strict });
     const report = await validator.validatePackage(path);
     
     // Canvas-specific analysis
