@@ -574,13 +574,17 @@ This is hidden in Canvas export.
 
 ## Templates
 
-Ready-to-use templates in `examples/`:
+Ready-to-use templates:
+
+**Markdown (no Quarto needed):**
 
 | Template | Description |
 |----------|-------------|
-| `starter-exam-md.md` | Minimal starter template |
-| `canvas-ready.md` | All question types for Canvas |
-| `canvas-validation.md` | Comprehensive test file |
+| [`minimal.md`](https://github.com/Data-Wise/examark/blob/main/templates/markdown/minimal.md) | 3 questions — quickest start |
+| [`starter.md`](https://github.com/Data-Wise/examark/blob/main/templates/markdown/starter.md) | One of each question type |
+| [`all-question-types.md`](https://github.com/Data-Wise/examark/blob/main/templates/markdown/all-question-types.md) | Comprehensive — all 8 types |
+
+**Quarto (R/Python):** See the [Quarto Extension](extensions/quarto.md) for `.qmd` templates.
 
 ---
 

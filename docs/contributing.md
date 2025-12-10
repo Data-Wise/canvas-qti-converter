@@ -144,7 +144,7 @@ npm run test:watch
 ```
 
 !!! tip "Test Coverage"
-    We use Vitest for testing. All 195 tests should pass before submitting a PR.
+    We use Vitest for testing. All 233 tests should pass before submitting a PR.
 
 ### Code Quality
 

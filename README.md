@@ -109,10 +109,10 @@ $$\bar{x} = \frac{\sum x_i}{n}$$
 - True/False (`[TF]`)
 - Multiple Answer (`[MA]`)
 - Short Answer (`[Short]`)
-- Numeric (`[Numeric]`)
+- Numerical (`[Num]`)
 - Essay (`[Essay]`)
 - Matching (`[Match]`)
-- Fill-in-Blanks (`[FMB]`)
+- Fill-in-Multiple-Blanks (`[FMB]`)
 
 </td>
 <td>

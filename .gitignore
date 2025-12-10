@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 bun.lockb
+bun.lock
 
 # Build output
 dist/
@@ -24,6 +25,9 @@ coverage/
 tmp/
 
 /.luarc.json
+
+# AI assistant config
+.ai/
 
 # Scratch
 scratch/
