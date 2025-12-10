@@ -33,11 +33,59 @@ Examark converts Markdown exam files to QTI 1.2 packages for Canvas LMS import.
 - Homebrew: `examify` formula deprecated
 - GitHub: Old URLs auto-redirect
 
-## Roadmap: Canvas New Quizzes Support
+## Project Status
 
-**Background:** Canvas New Quizzes accepts QTI 1.2 but is stricter about compliance than Classic Quizzes. No official sunset date for Classic Quizzes exists (Instructure removed the June 2024 deadline).
+### Completed Features ✅
 
-**Plan:**
+**Core Functionality:**
+- Markdown to QTI 1.2 conversion for Canvas LMS
+- 10 question types: MC, MA, TF, Essay, Short Answer, Numerical, Matching, FMB, Fill-in-Blank
+- 80+ type marker aliases (case-insensitive)
+- Multiple answer markers: `[x]`, `**bold**`, `✓`, `[correct]`, `*` prefix
+- Two syntax styles: Traditional (`## 1.`) and Clean (`1. [MC]`)
+- LaTeX math preservation (`$...$` → `\(...\)`)
+- Image bundling with automatic resolution
+- Inline and blockquote feedback support
+- General feedback (`> [feedback]`)
+
+**Output Formats:**
+- QTI 1.2 ZIP packages for Canvas import
+- Plain text export for printing (`-f text`)
+- Answer key inclusion/exclusion (`--no-answers`)
+
+**Validation & Diagnostics:**
+- Pre-conversion linting (`examark check`)
+- Post-conversion validation (`examark verify`)
+- Canvas import emulation (`examark emulate-canvas`)
+- Strict validation mode for New Quizzes (`--strict`)
+
+**CLI & Configuration:**
+- Batch conversion (`examark *.md`)
+- Config file support (`.examarkrc.json`)
+- Preview mode (`--preview`)
+- Title and points overrides
+
+**Quarto Extension (v0.6.6):**
+- 6 output formats: HTML, PDF, GFM, ODT, DOCX, Typst
+- Dynamic content with R/Python code chunks
+- Solution visibility toggle
+- QTI export workflow integration
+- 39 tests (38 passing, 1 skipped)
+
+**Distribution:**
+- npm package (`examark`)
+- Homebrew formula (`data-wise/tap/examark`)
+- Quarto extension (`quarto add Data-Wise/examark`)
+- Automated releases via GitHub Actions + OIDC
+
+**Project Hygiene (v0.6.6):**
+- Reorganized templates and examples into categorized folders
+- 233 tests passing
+- Full backward compatibility for renamed project
+
+### Canvas New Quizzes Support ✅
+
+**Background:** Canvas New Quizzes accepts QTI 1.2 but is stricter about compliance than Classic Quizzes. No official sunset date for Classic Quizzes exists.
 
 | Phase | Feature | Status |
 |-------|---------|--------|
@@ -45,20 +93,32 @@ Examark converts Markdown exam files to QTI 1.2 packages for Canvas LMS import.
 | 2 | Audit/Fix non-compliant QTI output | ✅ Complete (already compliant) |
 | 3 | QTI 2.1 export (future, if needed) | Not Started |
 
-**Phase 1: Strict Validation** ✅
-- Added `examark verify --strict` flag
-- Added `examark emulate-canvas --strict` flag
-- Validates required metadata: `question_type`, `points_possible`
-- Validates required elements: `itemmetadata`, `resprocessing`
-- Validates identifier formats
-- 7 new tests for strict validation
+### In Progress 🚧
 
-**Phase 2: Compliance Audit** ✅
-- Audited generated XML - already fully compliant
-- Current QTI output includes all required metadata and structure
-- No fixes needed - existing output passes strict validation
+*No active development items currently.*
 
-**Research (Dec 2025):**
+### Future Enhancements 📋
+
+**Near-term (Good First Issues):**
+- Question pools/banks support
+- Answer randomization options
+- Numeric answer ranges and tolerances
+- Auto-run examark after Quarto render (post-render hook)
+
+**Medium-term:**
+- QTI 2.1 export format (`src/generator/qti21.ts` exists, needs integration)
+- Question weighting/partial credit
+- More detailed error messages with line numbers
+- Import from other quiz formats (Moodle XML, GIFT)
+
+**Long-term:**
+- Web UI for preview and editing
+- Question bank management
+- AI-assisted question generation
+- LTI integration for direct Canvas publishing
+
+### Research Notes (Dec 2025)
+
 - UNM Canvas: Both Classic and New Quizzes enabled, no migration deadline
 - Canvas QTI 2.1: Supported in both quiz types
 - New Quizzes: Stricter validation, same QTI format
