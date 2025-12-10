@@ -4,6 +4,11 @@ project:
   render:
     - "examples/*.qmd"
 
+# Disable caching to avoid intermediate folders
+execute:
+  cache: false
+  freeze: false
+
 # =============================================================================
 # Examark Quarto Extension Project
 # =============================================================================
