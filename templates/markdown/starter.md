@@ -26,7 +26,7 @@ Export for printing:
 What is 2 + 2?
 
 a) 3
-b) **4** ✓
+b) 4 [x]
 c) 5
 d) 6
 
@@ -35,7 +35,7 @@ d) 6
 Which of the following is a primary color?
 
 a) Green
-b) **Blue** ✓
+b) Blue [x]
 c) Orange
 d) Purple
 
@@ -49,11 +49,11 @@ d) Purple
 
 ## 5. [MultiAns, 3pts] Select all even numbers
 
-*a) 2
+a) 2 [x]
 b) 3
-*c) 4
+c) 4 [x]
 d) 5
-*e) 6
+e) 6 [x]
 
 # Section: Short Answer
 
@@ -80,10 +80,10 @@ Question Headers:
   ## N. [Numeric] Question       - Numeric response
   ## N. [Essay] Question         - Long answer
 
-Answer Markers (pick one style):
-  **Bold text** ✓    - Bold with checkmark
-  **Bold text**      - Just bold works too
-  *a) Answer         - Asterisk prefix
+Answer Markers (recommended):
+  [x]                - Checkbox marker (preferred)
+  ✓                  - Checkmark (also works)
+  [correct]          - Explicit marker
 
 Points:
   [2 pts] or [2pts]  - Inline in question header

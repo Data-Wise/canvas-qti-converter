@@ -26,7 +26,7 @@ Which measure of central tendency is most affected by extreme outliers?
 
 a) Mode
 b) Median
-c) **Mean** ✓
+c) Mean [x]
 d) All are equally affected
 
 ## 2. Sample vs Population [2 pts]
@@ -35,7 +35,7 @@ A researcher surveys 500 randomly selected voters to predict election results. T
 
 a) The population
 b) A parameter
-c) **A sample** ✓
+c) A sample [x]
 d) A census
 
 ## 3. Correlation Interpretation [2 pts]
@@ -45,7 +45,7 @@ A correlation of r = -0.85 indicates:
 a) A weak positive relationship
 b) A weak negative relationship
 c) A strong positive relationship
-d) **A strong negative relationship** ✓
+d) A strong negative relationship [x]
 
 # Section: True/False Questions
 
@@ -66,7 +66,7 @@ d) **A strong negative relationship** ✓
 Which formula correctly represents sample variance?
 
 a) $s^2 = \frac{\sum(X_i - \bar{X})^2}{n}$
-b) **$s^2 = \frac{\sum(X_i - \bar{X})^2}{n-1}$** ✓
+b) $s^2 = \frac{\sum(X_i - \bar{X})^2}{n-1}$ [x]
 c) $s = \sqrt{\frac{\sum(X_i - \mu)^2}{N}}$
 d) $\sigma^2 = \frac{\sum(X_i - \mu)^2}{N}$
 
@@ -75,7 +75,7 @@ d) $\sigma^2 = \frac{\sum(X_i - \mu)^2}{N}$
 A student has a z-score of $z = 2.0$ on an exam. This means:
 
 a) The student scored 2 points above average
-b) **The student scored 2 standard deviations above the mean** ✓
+b) The student scored 2 standard deviations above the mean [x]
 c) The student is in the 2nd percentile
 d) The student scored twice the average
 
@@ -83,7 +83,7 @@ d) The student scored twice the average
 
 Identify the quadratic formula:
 
-a) **$$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$** ✓
+a) $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$ [x]
 b) $$E = mc^2$$
 c) $$a^2 + b^2 = c^2$$
 d) $$\bar{x} = \frac{\sum x_i}{n}$$
@@ -94,20 +94,20 @@ d) $$\bar{x} = \frac{\sum x_i}{n}$$
 
 Select ALL properties of a normal distribution:
 
-*a) Symmetric about the mean
+a) Symmetric about the mean [x]
 b) Always positively skewed
-*c) Mean equals median equals mode
-*d) Bell-shaped curve
+c) Mean equals median equals mode [x]
+d) Bell-shaped curve [x]
 e) Always has mean of zero
 
 ## 13. [MultiAns, 3pts] Valid Probability Values
 
 Which of the following are valid probability values?
 
-*a) 0.5
-*b) 0
+a) 0.5 [x]
+b) 0 [x]
 c) -0.3
-*d) 1
+d) 1 [x]
 e) 1.5
 
 # Section: Short Answer
@@ -132,9 +132,9 @@ Examine the histogram below and identify the shape of the distribution.
 
 ![Sample Histogram](assets/sample-graph.svg)
 
-a) **Symmetric** ✓
+a) Symmetric [x]
 b) Positively skewed
-c) Negatively skewed  
+c) Negatively skewed
 d) Bimodal
 
 # Section: Code Examples
@@ -148,7 +148,7 @@ mean(c(10, 20, 30, 40, 50))
 ```
 
 a) 50
-b) **30** ✓
+b) 30 [x]
 c) 150
 d) 25
 
@@ -163,7 +163,7 @@ print(statistics.median(data))
 ```
 
 a) 5
-b) **6** ✓
+b) 6 [x]
 c) 6.0
 d) 30
 
@@ -194,10 +194,10 @@ Question Types Supported by Canvas Classic Quizzes:
   - Numeric [Numeric]
   - Essay [Essay]
 
-Answer Markers (all work the same):
-  - **Bold** ✓         - Bold with checkmark
-  - **Bold**           - Just bold
-  - *a) asterisk       - Asterisk prefix for correct
+Answer Markers (recommended):
+  - [x]                - Checkbox marker (preferred)
+  - ✓                  - Checkmark (also works)
+  - [correct]          - Explicit marker
 
 LaTeX Math:
   - Inline: $x^2$

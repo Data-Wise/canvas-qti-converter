@@ -61,7 +61,7 @@ Uses `## N.` headers:
 ## 1. What is the capital of France? [2 pts]
 
 a) London
-b) **Paris** ✓
+b) Paris [x]
 c) Berlin
 ```
 
@@ -98,25 +98,29 @@ a) Option text
 A) Option text
 1) Option text
 - Option text
-* Option text (asterisk means correct if first char)
 ```
 
 ### Correct Answer Markers
 
-| Marker | Example | Style |
+**Recommended markers** (LaTeX-safe, Quarto-compatible):
+
+| Marker | Example | Notes |
 |--------|---------|-------|
-| `[x]` | `b) Paris [x]` | Clean, explicit |
-| `**bold**` | `b) **Paris**` | Visual emphasis |
+| `[x]` | `b) Paris [x]` | **Preferred** — Clean, explicit |
 | `✓` | `b) Paris ✓` | Unicode checkmark |
 | `✔` | `b) Paris ✔` | Alternative checkmark |
-| `[correct]` | `b) Paris [correct]` | Quarto-friendly |
-| `*` prefix | `*b) Paris` | Traditional |
+| `[correct]` | `b) Paris [correct]` | Verbose but clear |
 
-Multiple markers can be combined:
+**Deprecated markers** (still work, but not recommended):
 
-```markdown
-b) **Paris** [x] ✓   # All three work together
-```
+| Marker | Example | Why Deprecated |
+|--------|---------|----------------|
+| `**bold**` | `b) **Paris**` | Conflicts with LaTeX, reveals answers in preview |
+| `*` prefix | `*b) Paris` | Conflicts with Markdown lists |
+
+!!! warning "LaTeX Compatibility"
+    Bold markers (`**answer**`) conflict with LaTeX formulas like `**$\bar{x}$**`.
+    Always use `[x]` or `✓` when your answers contain math.
 
 ### Multiple Correct Answers
 
@@ -124,10 +128,10 @@ For `[MA]` (Multiple Answers) questions, mark each correct option:
 
 ```markdown
 1. [MA] Which are prime? [3pts]
-*a) 2
+a) 2 [x]
 b) 4
-*c) 7
-*d) 11
+c) 7 [x]
+d) 11 [x]
 ```
 
 ---
@@ -319,10 +323,10 @@ d) Standard deviation // Also measures spread
 2. [TF] Correlation implies causation. [1pt] → False
 
 3. [MA] Select all valid probability values. [2pts]
-*a) 0
-*b) 0.5
+a) 0 [x]
+b) 0.5 [x]
 c) 1.5
-*d) 1
+d) 1 [x]
 
 # Section: Calculations
 

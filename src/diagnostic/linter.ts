@@ -8,8 +8,49 @@ export interface LintError {
   context?: string;
 }
 
+/**
+ * Check for deprecated correct answer markers in raw content
+ * Deprecated markers: **bold**, * prefix
+ * Recommended markers: [x], ✓, ✔, [correct]
+ */
+function checkDeprecatedMarkers(content: string, errors: LintError[]): void {
+  const lines = content.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lineNum = i + 1;
+
+    // Check for **bold** marker on option lines
+    // Match: a) **text** or 1) **text** or - **text**
+    if (line.match(/^[\s]*(?:\*)?[a-e1-9]\)\s+\*\*[^*]+\*\*/i) ||
+        line.match(/^[\s]*-\s+\*\*[^*]+\*\*/)) {
+      errors.push({
+        line: lineNum,
+        message: 'Deprecated: **bold** marker for correct answers. Use [x] or ✓ instead. Bold conflicts with LaTeX formulas and reveals answers in preview.',
+        severity: 'warning',
+        context: line.trim().substring(0, 50)
+      });
+    }
+
+    // Check for * prefix marker (but not ** which is bold)
+    // Match: *a) text or *1) text (asterisk before letter/number)
+    if (line.match(/^[\s]*\*[a-e1-9]\)\s+/i) && !line.match(/^[\s]*\*\*/)) {
+      errors.push({
+        line: lineNum,
+        message: 'Deprecated: *prefix marker for correct answers. Use [x] or ✓ instead. Asterisk prefix conflicts with Markdown lists.',
+        severity: 'warning',
+        context: line.trim().substring(0, 50)
+      });
+    }
+  }
+}
+
 export function lintMarkdown(content: string): LintError[] {
   const errors: LintError[] = [];
+
+  // Check for deprecated markers first (before parsing)
+  checkDeprecatedMarkers(content, errors);
+
   const quiz = parseMarkdown(content);
 
   // 1. Check for empty quiz
@@ -74,7 +115,7 @@ function validateQuestion(q: Question, errors: LintError[], index: number) {
     if (correct.length === 0) {
       errors.push({
         line,
-        message: 'No correct answer marked. Use **bold** or *italics* to mark the correct option.',
+        message: 'No correct answer marked. Use [x] or ✓ to mark the correct option.',
         severity: 'error',
         context
       });
