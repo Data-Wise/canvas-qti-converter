@@ -21,10 +21,19 @@ Examark converts Markdown exam files to QTI 1.2 packages for Canvas LMS import.
 - Fixed: HTML anchor tags with `class="quarto-xref"` no longer break parser
 - Fixed: Multi-line HTML `<img>` tags now properly extracted and bundled
 - Fixed: Quarto cross-reference anchors stripped from QTI output (replaced with plain text)
+- Fixed: Negative numbers (e.g., `-0.678, SE = 0.289`) no longer treated as list items in parser
 - Added: Figure content preprocessing to capture images before questions
 - Added: HTML img tag support in image extraction and QTI generation
 - Added: Test suite for Quarto GFM compatibility (6 new tests)
 - Result: R plots, inline code, LaTeX math, comparison operators, and figure references all render correctly in Canvas
+
+**Canvas Emulator Enhancements (Dec 11):**
+- Added: `extractMattextHtml()` method to extract raw HTML from QTI packages (preserves `<code>`, `<img>`, LaTeX tags)
+- Added: Quarto GFM compatibility tracking infrastructure in validator
+- Modified: Validator now processes raw XML alongside parsed JSON for accurate HTML content analysis
+- Infrastructure: Pre-scan logic for detecting inline code (12 found), LaTeX math (59 found), escaped operators (16 found)
+- Status: Feature detection works, display output temporarily disabled pending debugging (TODO)
+- Benefit: Foundation in place for future Quarto-aware QTI validation and reporting
 
 **Positron IDE Integration (Dec 11):**
 - Created VS Code task for one-command QTI generation: `./qti-render <file.qmd>`

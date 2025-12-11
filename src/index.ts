@@ -76,15 +76,27 @@ program
       w.includes('responseProcessing') ||
       w.includes('limited Canvas support')
     );
-    
+
+    const quartoWarnings = report.warnings.filter(w =>
+      w.includes('Quarto GFM') ||
+      w.includes('escaped HTML') ||
+      w.includes('unconverted math') ||
+      w.includes('Dollar signs detected')
+    );
+
     console.log(`📊 Analysis Results:`);
     console.log(`   Items scanned: ${report.details.itemCount}`);
     console.log(`   Resources: ${report.details.resourceCount}`);
     console.log(`   Has test structure: ${report.details.testFound ? 'Yes' : 'No'}`);
-    
+
     if (canvasErrors.length === 0 && report.errors.length === 0) {
       console.log(`\n✅ PREDICTION: Canvas import will likely SUCCEED`);
-      
+
+      if (quartoWarnings.length > 0) {
+        console.log(`\n📝 Quarto GFM Compatibility:`);
+        quartoWarnings.forEach(w => console.log(`   ${w}`));
+      }
+
       if (canvasWarnings.length > 0) {
         console.log(`\n⚠️  Warnings (may need attention):`);
         canvasWarnings.forEach(w => console.log(`   • ${w}`));

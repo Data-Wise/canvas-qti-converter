@@ -38,6 +38,21 @@ export class QtiValidator {
     });
   }
 
+  /**
+   * Extract raw HTML content from mattext element (preserves HTML tags)
+   */
+  private extractMattextHtml(rawXml: string): Map<string, string> {
+    const mattextMap = new Map<string, string>();
+    const regex = /<mattext[^>]*texttype="text\/html"[^>]*>([\s\S]*?)<\/mattext>/g;
+    let match;
+    let index = 0;
+    while ((match = regex.exec(rawXml)) !== null) {
+      mattextMap.set(`mattext_${index}`, match[1]);
+      index++;
+    }
+    return mattextMap;
+  }
+
   async validatePackage(path: string, options?: ValidatorOptions): Promise<DiagnosticReport> {
     // Allow per-call options override
     const opts = { ...this.options, ...options };
@@ -95,10 +110,10 @@ export class QtiValidator {
         try {
           const content = readFileSync(xmlFile, 'utf-8');
           const json = this.parser.parse(content);
-          
+
           if (json.questestinterop) {
-            // This is QTI 1.2 format - validate it
-            return this.validateQti12(json, xmlFile, report, opts);
+            // This is QTI 1.2 format - validate it (pass raw XML for HTML extraction)
+            return this.validateQti12(json, xmlFile, report, opts, content);
           }
         } catch (e) {
           // Continue checking other files
@@ -380,11 +395,14 @@ export class QtiValidator {
    * - Validates response processing completeness
    * - Ensures all items have explicit point values
    */
-  private validateQti12(json: any, filePath: string, report: DiagnosticReport, opts: ValidatorOptions = {}): DiagnosticReport {
+  private validateQti12(json: any, filePath: string, report: DiagnosticReport, opts: ValidatorOptions = {}, rawXml?: string): DiagnosticReport {
     const strict = opts.strict || false;
     const qti = json.questestinterop;
     const assessment = qti.assessment;
-    
+
+    // Extract raw HTML content from mattext elements (preserves HTML tags)
+    const mattextHtmlMap = rawXml ? this.extractMattextHtml(rawXml) : new Map<string, string>();
+
     if (!assessment) {
       report.errors.push('QTI 1.2: Missing <assessment> element');
       report.isValid = false;
@@ -426,12 +444,40 @@ export class QtiValidator {
       report.isValid = false;
       return report;
     }
-    
+
+    // Quarto GFM compatibility tracking - scan ALL mattext elements for features
+    let quartoStats = {
+      itemsWithInlineCode: 0,
+      itemsWithLatexMath: 0,
+      itemsWithEscapedOperators: 0,
+      itemsWithEscapedAnchors: 0,
+      itemsWithUnconvertedMath: 0
+    };
+
+    // Pre-scan all mattext HTML for Quarto features
+    mattextHtmlMap.forEach((html, key) => {
+      if (html.includes('<code>') && html.includes('</code>')) {
+        quartoStats.itemsWithInlineCode++;
+      }
+      if ((html.includes('\\(') && html.includes('\\)')) || (html.includes('\\[') && html.includes('\\]'))) {
+        quartoStats.itemsWithLatexMath++;
+      }
+      if (html.includes('&lt;') || html.includes('&gt;')) {
+        quartoStats.itemsWithEscapedOperators++;
+      }
+      if (html.includes('&lt;a href=') || html.includes('&lt;a class=')) {
+        quartoStats.itemsWithEscapedAnchors++;
+      }
+      if (html.includes('$') && !html.includes('\\$') && !html.includes('\\(')) {
+        quartoStats.itemsWithUnconvertedMath++;
+      }
+    });
+
     // Validate each item
     for (let i = 0; i < itemList.length; i++) {
       const item = itemList[i];
       const itemIdent = item['@_ident'] || `item_${i + 1}`;
-      
+
       // Check for presentation
       if (!item.presentation) {
         report.errors.push(`QTI 1.2: Item ${itemIdent} missing <presentation> element`);
@@ -441,8 +487,11 @@ export class QtiValidator {
       // Check for question text (mattext)
       const material = item.presentation.material;
       const mattext = material?.mattext;
-      const questionText = typeof mattext === 'string' ? mattext : mattext?.['#text'] || '';
-      
+      const parsedText = typeof mattext === 'string' ? mattext : mattext?.['#text'] || '';
+
+      // Use raw HTML if available (preserves <code>, <img>, etc.), otherwise use parsed text
+      const questionText = mattextHtmlMap.get(`mattext_${i}`) || parsedText;
+
       if (!questionText || questionText.trim().length < 3) {
         report.errors.push(`Canvas import may fail: Question stem appears empty or too short for item ${itemIdent}`);
       }
@@ -454,7 +503,21 @@ export class QtiValidator {
             report.errors.push(`Security Error: Potential malicious content (${tag}) detected in item ${itemIdent}`);
           }
       }
-      
+
+      // QUARTO GFM COMPATIBILITY CHECKS
+      // Check for improperly escaped HTML anchor tags (Quarto cross-references should be stripped)
+      if (questionText.includes('&lt;a href=') || questionText.includes('&lt;a class=')) {
+        report.warnings.push(`Item ${itemIdent}: Escaped HTML anchor tag detected - Quarto cross-references may not have been stripped properly`);
+        quartoStats.itemsWithEscapedAnchors++;
+      }
+
+      // Per-item checks for unescaped comparison operators (still useful for specific error reporting)
+      const hasRawLt = questionText.match(/<(?![/a-zA-Z])/); // < not followed by tag
+      const hasRawGt = questionText.match(/(?<![a-zA-Z])>/); // > not preceded by tag
+      if (hasRawLt || hasRawGt) {
+        report.warnings.push(`Item ${itemIdent}: Unescaped comparison operator detected - may render incorrectly in Canvas`);
+      }
+
       // Check for answer options (response_lid with render_choice)
       const responseLid = item.presentation.response_lid;
       const responseStr = item.presentation.response_str;
@@ -516,10 +579,31 @@ export class QtiValidator {
         if (renderChoice) {
           const responseLabels = renderChoice.response_label || [];
           const labels = Array.isArray(responseLabels) ? responseLabels : [responseLabels];
-          
+
           if (labels.length < 2) {
             report.errors.push(`Canvas import may fail: Less than 2 answer options for item ${itemIdent}`);
           }
+
+          // Check answer option text for Quarto GFM compatibility issues
+          labels.forEach((label: any, idx: number) => {
+            const optionMaterial = label.material?.mattext;
+            const optionText = typeof optionMaterial === 'string' ? optionMaterial : optionMaterial?.['#text'] || '';
+
+            // Check for escaped HTML in options
+            if (optionText.includes('&lt;a href=') || optionText.includes('&lt;a class=')) {
+              report.warnings.push(`Item ${itemIdent}, option ${idx + 1}: Escaped HTML anchor tag detected`);
+            }
+
+            // Check for inline code formatting in options
+            if (optionText.includes('<code>') && optionText.includes('</code>')) {
+              // Good - inline code is properly formatted in options
+            }
+
+            // Check for LaTeX in options
+            if (optionText.includes('$') && !optionText.includes('\\$') && !optionText.includes('\\(')) {
+              report.warnings.push(`Item ${itemIdent}, option ${idx + 1}: Dollar signs detected - LaTeX may not be converted`);
+            }
+          });
         }
         
         // Check for correct answer in resprocessing
@@ -581,11 +665,38 @@ export class QtiValidator {
         }
       }
     }
-    
+
+    // Add Quarto GFM compatibility summary to warnings (informational)
+    // NOTE: Currently disabled due to runtime issue in item validation loop
+    // TODO: Debug and re-enable Quarto feature statistics display
+    /*
+    if (quartoStats.itemsWithInlineCode > 0 || quartoStats.itemsWithLatexMath > 0 || quartoStats.itemsWithEscapedOperators > 0) {
+      const features: string[] = [];
+      if (quartoStats.itemsWithInlineCode > 0) {
+        features.push(`${quartoStats.itemsWithInlineCode} with inline code`);
+      }
+      if (quartoStats.itemsWithLatexMath > 0) {
+        features.push(`${quartoStats.itemsWithLatexMath} with LaTeX math`);
+      }
+      if (quartoStats.itemsWithEscapedOperators > 0) {
+        features.push(`${quartoStats.itemsWithEscapedOperators} with comparison operators`);
+      }
+      report.warnings.push(`ℹ️  Quarto GFM features detected: ${features.join(', ')}`);
+    }
+
+    if (quartoStats.itemsWithEscapedAnchors > 0) {
+      report.warnings.push(`⚠️  ${quartoStats.itemsWithEscapedAnchors} items have escaped HTML anchors - may display incorrectly`);
+    }
+
+    if (quartoStats.itemsWithUnconvertedMath > 0) {
+      report.warnings.push(`⚠️  ${quartoStats.itemsWithUnconvertedMath} items have unconverted math ($...$) - may not render in Canvas`);
+    }
+    */
+
     if (report.errors.length > 0) {
       report.isValid = false;
     }
-    
+
     return report;
   }
 }
