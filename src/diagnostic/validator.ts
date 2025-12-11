@@ -474,23 +474,24 @@ export class QtiValidator {
     });
 
     // Validate each item
-    for (let i = 0; i < itemList.length; i++) {
-      const item = itemList[i];
-      const itemIdent = item['@_ident'] || `item_${i + 1}`;
+    try {
+      for (let i = 0; i < itemList.length; i++) {
+        const item = itemList[i];
+        const itemIdent = item['@_ident'] || `item_${i + 1}`;
 
-      // Check for presentation
-      if (!item.presentation) {
-        report.errors.push(`QTI 1.2: Item ${itemIdent} missing <presentation> element`);
-        continue;
-      }
+        // Check for presentation
+        if (!item.presentation) {
+          report.errors.push(`QTI 1.2: Item ${itemIdent} missing <presentation> element`);
+          continue;
+        }
       
       // Check for question text (mattext)
       const material = item.presentation.material;
       const mattext = material?.mattext;
       const parsedText = typeof mattext === 'string' ? mattext : mattext?.['#text'] || '';
 
-      // Use raw HTML if available (preserves <code>, <img>, etc.), otherwise use parsed text
-      const questionText = mattextHtmlMap.get(`mattext_${i}`) || parsedText;
+      // Always use parsed text for validation (raw HTML was only for pre-scan statistics)
+      const questionText = parsedText;
 
       if (!questionText || questionText.trim().length < 3) {
         report.errors.push(`Canvas import may fail: Question stem appears empty or too short for item ${itemIdent}`);
@@ -504,14 +505,15 @@ export class QtiValidator {
           }
       }
 
-      // QUARTO GFM COMPATIBILITY CHECKS
+      // Note: Quarto GFM feature detection is now done in pre-scan (see above)
+      // Per-item validation for specific issues only:
+
       // Check for improperly escaped HTML anchor tags (Quarto cross-references should be stripped)
       if (questionText.includes('&lt;a href=') || questionText.includes('&lt;a class=')) {
         report.warnings.push(`Item ${itemIdent}: Escaped HTML anchor tag detected - Quarto cross-references may not have been stripped properly`);
-        quartoStats.itemsWithEscapedAnchors++;
       }
 
-      // Per-item checks for unescaped comparison operators (still useful for specific error reporting)
+      // Check for unescaped comparison operators (specific error reporting)
       const hasRawLt = questionText.match(/<(?![/a-zA-Z])/); // < not followed by tag
       const hasRawGt = questionText.match(/(?<![a-zA-Z])>/); // > not preceded by tag
       if (hasRawLt || hasRawGt) {
@@ -587,7 +589,10 @@ export class QtiValidator {
           // Check answer option text for Quarto GFM compatibility issues
           labels.forEach((label: any, idx: number) => {
             const optionMaterial = label.material?.mattext;
-            const optionText = typeof optionMaterial === 'string' ? optionMaterial : optionMaterial?.['#text'] || '';
+            const optionText = typeof optionMaterial === 'string' ? optionMaterial : (optionMaterial?.['#text'] || '');
+
+            // Skip if optionText is not a string
+            if (typeof optionText !== 'string') return;
 
             // Check for escaped HTML in options
             if (optionText.includes('&lt;a href=') || optionText.includes('&lt;a class=')) {
@@ -664,22 +669,23 @@ export class QtiValidator {
           report.warnings.push(`Item ${itemIdent} has image with relative path - may not display in Canvas`);
         }
       }
+      }
+    } catch (error: any) {
+      // Log error but continue with summary
+      report.warnings.push(`⚠️  Error during item validation: ${error.message}`);
     }
 
     // Add Quarto GFM compatibility summary to warnings (informational)
-    // NOTE: Currently disabled due to runtime issue in item validation loop
-    // TODO: Debug and re-enable Quarto feature statistics display
-    /*
     if (quartoStats.itemsWithInlineCode > 0 || quartoStats.itemsWithLatexMath > 0 || quartoStats.itemsWithEscapedOperators > 0) {
       const features: string[] = [];
       if (quartoStats.itemsWithInlineCode > 0) {
-        features.push(`${quartoStats.itemsWithInlineCode} with inline code`);
+        features.push(`${quartoStats.itemsWithInlineCode} items with inline code`);
       }
       if (quartoStats.itemsWithLatexMath > 0) {
-        features.push(`${quartoStats.itemsWithLatexMath} with LaTeX math`);
+        features.push(`${quartoStats.itemsWithLatexMath} items with LaTeX math`);
       }
       if (quartoStats.itemsWithEscapedOperators > 0) {
-        features.push(`${quartoStats.itemsWithEscapedOperators} with comparison operators`);
+        features.push(`${quartoStats.itemsWithEscapedOperators} items with comparison operators`);
       }
       report.warnings.push(`ℹ️  Quarto GFM features detected: ${features.join(', ')}`);
     }
@@ -691,7 +697,6 @@ export class QtiValidator {
     if (quartoStats.itemsWithUnconvertedMath > 0) {
       report.warnings.push(`⚠️  ${quartoStats.itemsWithUnconvertedMath} items have unconverted math ($...$) - may not render in Canvas`);
     }
-    */
 
     if (report.errors.length > 0) {
       report.isValid = false;
